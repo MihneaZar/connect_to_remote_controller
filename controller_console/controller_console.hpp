@@ -57,7 +57,7 @@ struct print_style {
 
 // this is a singleton for the absolute coordinates of the computer screen
 // and the screen coordinates (coordinates of the cursor within the computer screen)
-class cursor_coords{
+class cursor_coords {
     // coordinates for cursor
     // abs_coords                 -> the absolute coordinates of the first screen character (top left)
     // screen_coords              -> current coordinates on the screen, relative to the abs_coords
@@ -71,6 +71,9 @@ class cursor_coords{
     cursor_coords() {}
 
 public:
+    // Deleting the copy constructor to prevent copies
+    cursor_coords(const cursor_coords& obj) = delete;
+
     // static method to get instance
     static cursor_coords* get_instance();
 

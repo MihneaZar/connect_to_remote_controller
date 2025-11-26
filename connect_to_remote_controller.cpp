@@ -1,64 +1,6 @@
 #include "connect_to_remote_controller.hpp"
 
-// combat_zone singleton functions START
-combat_zone* combat_zone::instance = nullptr;
-
-combat_zone* combat_zone::get_instance() {
-    if (instance == nullptr) {
-        instance = new combat_zone();
-    }
-    return instance;
-}
-
-void combat_zone::init_map(SHORT size) {
-    map_size = size;
-
-    // corners
-    area_map[0][0] = MAP_CORNER;
-    area_map[0][map_size + 1] = MAP_CORNER;
-    area_map[map_size + 1][0] = MAP_CORNER;
-    area_map[map_size + 1][map_size + 1] = MAP_CORNER;
-
-    for (int i = 1; i < map_size + 1; i++) {
-        // vertical edges
-        area_map[i][0] = MAP_VERTICAL; 
-        area_map[i][map_size + 1] = MAP_VERTICAL;
-
-        // horizontal edges
-        area_map[0][i] = MAP_HORIZONTAL; 
-        area_map[map_size + 1][i] = MAP_HORIZONTAL;
-    }
-
-    // generating obstacles randomly
-    for (int i = 1; i <= map_size; i++) {
-        for (int j = 1; j <= map_size; j++) {
-
-            // percentage between 1 and 100
-            if ((rand() % 100 + 1) <= OBSTACLE_CHANCE) {
-                area_map[i][j] = OBSTACLE;
-            } else {
-                area_map[i][j] = EMPTY;
-            }
-        }
-    }
-}
-
-enum map_object combat_zone::get_map_object(SHORT line, SHORT column) {
-    return area_map[line][column];
-}
-
-SHORT combat_zone::get_map_size() {
-    return map_size;
-}
-
-void combat_zone::set_map_object(SHORT line, SHORT column, enum map_object object) {
-    area_map[line][column] = object;
-}
-// combat_zone singleton functions END
-
 bool connect_to_destructor = false;
-
-COORD destructor, venator;
 
 std::ofstream debug("debug.txt", std::ios::app);
 
@@ -241,6 +183,11 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
     // rather than starting on line 1, or any other specific line, it starts
     // on line original_coords.Y
     COORD original_coords = cursor_coords::get_instance()->get_screen_coords();
+
+    // initialise map
+    combat_zone::get_instance()->init_map();
+
+    destructor_class *destructor = new destructor_class();
     while (true) {
         std::string command = get_engineer_command();
 
@@ -252,7 +199,7 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
         int add_parameter = parse_command_parameter(command);
 
         // the two commands for these checks have already printed the error, all that remains is to continue;
-        if (add_parameter == PARAMETER_ERROR || !check_energy_cooldown(command, add_parameter)) {
+        if (add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(command, add_parameter)) {
             // clean last command
             clean_lines(original_coords.Y);
             continue;
@@ -266,17 +213,16 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
         }
 
         if (type == "energy") {
-            generate_energy(add_parameter);
+            destructor->generate_energy(add_parameter);
         }
 
-        int direction = DIRECTIONS.find(type);
-        if (direction != std::string::npos) {
-            move_destructor(direction);
+        // checking just first character for direction (w|a|s|d)
+        if (command[1] == ' ' && destructor->move(command[0])) {
             continue;
         }
 
         if (type == "scan") {
-            destructor_scan(add_parameter);
+            destructor->scan(add_parameter);
         }
 
         // this is for the training simulators
@@ -310,7 +256,6 @@ void training_simulator() {
     print_by_char("Remember this: although the RC can only send you snapshots of the system, it's all happening in real time - and time is of the essence.\n", false, CONTROLLER_INFO_STYLE);
     print_by_char("On top of that, each subsystem has its limitations: its abilities require energy, which you need to manually recharge, and they also have a cooldown.\n", false, CONTROLLER_INFO_STYLE);
     print_by_char("That said, get used to the controls in this first simulation, then hit 'c[ontinue]'.\n", false, CONTROLLER_INFO_STYLE);
-    combat_zone::get_instance()->init_map();
     mission_loop(SIMULATOR_MOVEMENT);
 
     print_by_char("Now, the first ", false, CONTROLLER_INFO_STYLE);

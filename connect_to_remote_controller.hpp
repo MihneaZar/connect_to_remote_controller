@@ -7,7 +7,8 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #include "controller_console/controller_console.hpp"
-#include "destructor/destructor_actions.hpp"
+#include "destructor/destructor.hpp"
+#include "combat_zone/combat_zone.hpp"
 #include <bits/stdc++.h> // for count (checking if value is in vector) - goddamn another include y a y
 #include <openssl/evp.h> // for the md5 hashing (jesus christ that took forever)
 #include <cstdlib>       // good ol' rand()
@@ -51,77 +52,6 @@ std::string parse_command_type(const std::string command, const std::vector<std:
 // separated from the command by at least one space
 // returns PARAMETER_ERROR if it can't parse the parameter
 int parse_command_parameter(std::string command);
-
-// possible map sizes
-const SHORT SMALL_MAP_SIZE  =  25;
-const SHORT MEDIUM_MAP_SIZE =  50;
-const SHORT LARGE_MAP_SIZE  = 100;
-
-// percent chance of normal obstacles to spawn
-const int OBSTACLE_CHANCE = 10;
-
-// enum for character objects on the map
-enum map_object {
-    EMPTY      = ' ',
-    DESTRUCTOR = 'o',
-    OBSTACLE   = '#',
-
-    // debugging venator behaviour
-    // could be a stronger scanner in the future
-    // and counter to this would be the illusion/copy venator
-    VENATOR_DEBUG = 'x',
-
-    // we'll see how to implement this (errors should stay identical in the same scan)
-    SCAN_ERROR = '*',
-
-    // map edges
-    // consider if u should use terminal edges
-    MAP_CORNER     = '+',
-    MAP_VERTICAL   = '|',
-    MAP_HORIZONTAL = '-' 
-};
-
-// this is a singleton for the combat zone (map of the game)
-class combat_zone{
-
-    // actual map, of map_objects
-    // the +2 is for map edges
-    // legal positions will be between (1, 1) and (map_size, map_size)
-    // though map_size should be used only for initializations
-    enum map_object area_map[LARGE_MAP_SIZE + 2][LARGE_MAP_SIZE + 2];
-
-    // size of combat zone
-    SHORT map_size;
-
-    // static pointer to instance
-    static combat_zone* instance;
-
-    // private constructor
-    combat_zone() {}
-
-public:
-    // static method to get instance
-    static combat_zone* get_instance();
-
-    void init_map(SHORT size = LARGE_MAP_SIZE);
-
-    enum map_object get_map_object(SHORT line, SHORT column);
-
-    SHORT get_map_size();
-
-    void set_map_object(SHORT line, SHORT column, enum map_object object);
-};
-
-// for now, we ignore the venator
-// yet to decide whether multiple venators can be on the map -> copy venator? (could do that by just moving other obstacles randomly)
-extern COORD destructor, venator;
-
-// this initializes the map:
-// sets map_size to given parameter;
-// sets map edges;
-// sets obstacles randomly;
-// sets destructor and venator position (!!! for now, only destructor)
-void init_combat_zone(int size = LARGE_MAP_SIZE);
 
 // function for creating a random remote controller name
 // (purely flavor text, at least for now)
