@@ -1,0 +1,16 @@
+[Receiver: Textfile intercepted]
+[ERROR #453 - Receiver module at 85% efficacy]
+-- Start of transmission --
+E000000: They hacked them! I don't know how, but they hacked them!
+E0000fH: <unintelligible> What?! Chief, what the hell are you talking about?
+E000000: The- ah! <inaudible> All I can tell you, Laura, is that the Venators have figured out a way to dupe our deep learning algorithms!
+E0000fH: Wha- you mean, none of our architectures work? How?
+E000000: I don't know! These things just keep... getting smarter. At this point, every combination of algorithms we've thrown at them, they've undone it in minutes! 
+E000000: The general has ordered all primary engineers in the building to gather in sector Alpha and-  
+E0000T1: They're going to space-evac us! Really? And what's the purpose of that?
+E000000: The idea is, Ava, that Alan is working on a program to access the remote controllers from afar. Like space afar. With us up there, controlling the destructors remotely-
+E0000T1: <inaudible> Yeah, through those deprecated controllers-
+E000000: -yes, until we can space-evac as many people. Then...
+E0000fH: ... then what?
+E000000: <inaudible>
+-- End of transmission --

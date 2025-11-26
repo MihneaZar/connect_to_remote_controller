@@ -1,0 +1,6 @@
+[Receiver: Textfile intercepted]
+[ERROR #453 - Receiver module at 85% efficacy]
+-- Start of transmission --
+E40a0F1: ... 'space-evac the engineers first', they said... and here we are, scattered in Earth's orbit, in our comfy little pods, sipping this disgusting pre-prepped coffee, tip-taping at our consoles, just hoping we are fast enough and smart enough to outmanouver those sonofabitches before they massacre another bunker, and for what?! They just keep coming! We save one bunker, they slaughter another two. I can't be the only one who sees this- I don't like it one inch, but goddamnit, Earth is DONE!
+E40a0F1: <inaudible> Ah, fuck me, dude. The chief knows what he has to do, but I've yet to see the fireworks... <unintelligible> who knows, maybe the venators will get us all before that happens.
+-- End of transmission --

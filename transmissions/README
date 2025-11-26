@@ -1,0 +1,11 @@
+[ERROR #453 - Receiver module at 85% efficacy]
+-- Start of transmission --
+E0000½: Okay, okay, now I gotta;.. connect... to... remote... contr- okay. SyĤ admin. Right, okay, this is the password, and if I coÑy it here, it should- yes. YĪs?... YES! It works, okay, I am connected to the station. Are you »ransmitting this?
+S00001: Afìirmative.
+E00001: Perfect. So... <unintelligible>ahć Alright, enÇineer, I donno how you're¦receiving this message - hell, we're transmitting Ńhis through every formatter and every encryptor wePhave, so there is no certainty this message reaches yoÚ intact, or if it even does. But the program is¸sent through the secure channel, soĖthat should be... alright.
+S00001: Transmission winÕow: 30 seco-
+E00001: Okay, okay! So, run the progam. You need to give it the system admin user and the haŬh to the temporary password it genera- Wait. Shit! I didn't- <unintelligible>ó it will fail once, but it's fine, as long as you don'tìrun it with dot debug as th³ hash, that will lock you out. Anyway, once it confirms you aą system admin, it should connect you to the fiőst remote controller it can find.
+S00001: 10 sec-
+E00Ò01: -It doesn't matter if you've used one bïfore, I designed it as simplistic a¯ I could. Type h for help, it will list the commands,atype start to-uh, start it! Oh, right, and the pasĭword, it's hashed with M-
+-- End of transmission --
+[Secure channel: received executable file]

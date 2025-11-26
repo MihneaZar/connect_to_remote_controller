@@ -1,0 +1,1 @@
+@START C:\Users\Mihnea\Desktop\"Random thoughts"\"Computer Screen"\connect_to_remote_contoller.exe sys_admin .debug
