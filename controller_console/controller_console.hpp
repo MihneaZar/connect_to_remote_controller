@@ -19,11 +19,12 @@ const char VERTICAL     = '|'; // │
 const char HORIZONTAL   = '-'; // ─
 #endif
 
-#include <windows.h>     // for biutiuful calor
+#include <windows.h> // for biutiuful calor
 #include <iostream>
-#include <conio.h>       // getch()
-#include <chrono>        // < these two are for
-#include <thread>        // < waiting in milisex
+#include <fstream>   // for debug
+#include <conio.h>   // getch()
+#include <chrono>    // < these two are for
+#include <thread>    // < waiting in milisex
 
 // screen size
 // screen width should be odd so that destructor is not off center
@@ -70,6 +71,9 @@ class cursor_coords {
     // private constructor
     cursor_coords() {}
 
+    // for debug
+    std::ofstream debug;
+
 public:
     // Deleting the copy constructor to prevent copies
     cursor_coords(const cursor_coords& obj) = delete;
@@ -88,6 +92,9 @@ public:
     // sets screen coords to given coords (if given)
     // sets cursor to new coordinates from screen_coords
     void set_cursor(COORD new_coords = {-1, -1});
+
+    // prints given string into debug
+    void print_debug(std::string text);
 };
 
 // terminal styles

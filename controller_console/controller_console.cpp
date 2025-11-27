@@ -49,6 +49,14 @@ void cursor_coords::set_cursor(COORD new_coords) {
     csbiInfo.dwCursorPosition.Y = abs_coords.Y + screen_coords.Y;
     SetConsoleCursorPosition(hConsole, csbiInfo.dwCursorPosition);
 }
+
+void cursor_coords::print_debug(std::string text) {
+
+    // openning and closing debug to see changes real time
+    debug.open("debug.txt", std::ios_base::app);
+    debug << text;
+    debug.close();
+}
 // cursor_coords singleton functions END
 
 bool same_style(print_style style1, print_style style2) {

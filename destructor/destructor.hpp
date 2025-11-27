@@ -9,7 +9,7 @@
 const int DIRECTION_NO = 4;
 const std::string DIRECTIONS = "wasd";
 // effect of move
-const COORD D_MOVE[] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
+const COORD D_MOVE[] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
 // could be higher in the future for heavy destructors
 const int MAX_ENERGY_LEVEL = 10;
@@ -23,8 +23,7 @@ const int BASE_SCAN_RANGE     = 2;
 // however, since it only needs to exist inside mission_loop (and could be sent as a parameter if needed)
 // no reason to make it a singleton
 class destructor_class {
-    // coordinates on the screen (fixed in place)
-    // coordinates on the game map
+    // coordinates on the screen (fixed in place), coordinates on the game map
     COORD screen_coords, map_coords;
 
     SHORT curr_energy_level;
@@ -32,10 +31,12 @@ class destructor_class {
     // range, position (center), and map of last performed scan
     SHORT  scan_range;
     COORD scan_coords;
-    map_object::enum_objects scan_map[MAX_SCAN_RANGE][MAX_SCAN_RANGE];
+    char scan_map[MAX_SCAN_RANGE][MAX_SCAN_RANGE];
 
 public:
     destructor_class();
+
+    COORD get_screen_coords();
 
     void print_subsystem_status();
 

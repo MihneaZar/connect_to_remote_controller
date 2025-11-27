@@ -70,3 +70,13 @@ SHORT combat_zone::get_map_size() {
 void combat_zone::set_map_object(COORD position, map_object::enum_objects object) {
     area_map[position.X][position.Y] = object;
 }
+
+void combat_zone::debug_print() {
+    for (int i = 0; i < map_size + 2; i++) {
+        for (int j = 0; j < map_size + 2; j++) {
+            cursor_coords::get_instance()->print_debug(map_object_str(area_map[i][j]));
+        }
+        cursor_coords::get_instance()->print_debug("\n");
+    }
+    cursor_coords::get_instance()->print_debug("\n");
+}

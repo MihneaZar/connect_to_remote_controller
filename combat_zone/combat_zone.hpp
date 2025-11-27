@@ -2,6 +2,7 @@
 
 #define COMBAT_ZONE_HPP
 
+#include "../controller_console/controller_console.hpp"
 #include <windows.h> // SHORT 
 #include <cstdlib>   // good ol' rand()
 #include <string>
@@ -32,9 +33,10 @@ namespace map_object {
 std::string map_object_str(map_object::enum_objects);
 
 // possible map sizes
-const SHORT SMALL_MAP_SIZE  =  25;
-const SHORT MEDIUM_MAP_SIZE =  50;
-const SHORT LARGE_MAP_SIZE  = 100;
+// 100 was WAYYYY too big
+const SHORT SMALL_MAP_SIZE  = 10;
+const SHORT MEDIUM_MAP_SIZE = 20;
+const SHORT LARGE_MAP_SIZE  = 30;
 
 // percent chance of normal obstacles to spawn
 const int OBSTACLE_CHANCE = 10;
@@ -71,6 +73,9 @@ public:
     SHORT get_map_size();
 
     void set_map_object(COORD position, map_object::enum_objects object);
+
+    // printing map separately to make sure all is good
+    void debug_print();
 };
 
 #endif

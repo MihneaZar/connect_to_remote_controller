@@ -2,8 +2,6 @@
 
 bool connect_to_destructor = false;
 
-std::ofstream debug("debug.txt", std::ios::app);
-
 std::string get_engineer_command() {
     print_by_char(">> ");
     
@@ -204,9 +202,16 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
 
     destructor_class *destructor = new destructor_class();
 
-    cursor_coords::get_instance()->set_cursor({0, original_coords.Y + 1});
+    cursor_coords::get_instance()->set_cursor(destructor->get_screen_coords());
+    print_by_char("o", false, CONTROLLER_INFO_STYLE);
+
+    COORD new_coords;
+    new_coords.X = 0;
+    new_coords.Y = original_coords.Y + 1;
+    cursor_coords::get_instance()->set_cursor(new_coords);
     destructor->print_subsystem_status();
-    cursor_coords::get_instance()->set_cursor({0, original_coords.Y});
+    new_coords.Y--;
+    cursor_coords::get_instance()->set_cursor(new_coords);
     while (true) {
         std::string command = get_engineer_command();
 
@@ -235,8 +240,10 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
             destructor->generate_energy(add_parameter);
         }
 
+        // HERE I AM **NOT** SUPPOSED TO GIVE IT TYPE AAAA
+        // THE ONE PLACE
         if (!continue_loop) {
-            continue_loop = destructor->move(type);
+            continue_loop = destructor->move(command.substr(0, command.find(' ')));
         }
 
         if (!continue_loop && type == "scan") {
@@ -251,6 +258,9 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
         }
 
         destructor->print_subsystem_status();
+        destructor->print_scan();
+
+        combat_zone::get_instance()->debug_print();
 
         // all that's left is to print the map, everything else should be good (hopefully, fingers crossed)
 
