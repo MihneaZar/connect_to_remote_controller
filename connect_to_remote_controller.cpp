@@ -95,19 +95,21 @@ std::string get_engineer_command() {
             }
         }
     }
+
+    // converting command to lowercase
+    int length = command.length();
+    for (int i = 0; i < length; i++) {
+        if ('A' <= command[i] && command[i] <= 'Z') {
+            command[i] += 'a' - 'A'; 
+        }
+    }
     return command;
 }
 
 std::string parse_command_type(const std::string command, const std::vector<std::string> accepted_commands) {
     std::string type = command.substr(0, command.find(' '));
-    
-    // converting string to lowercase
+
     int length = type.length();
-    for (int i = 0; i < length; i++) {
-        if ('A' <= type[i] && type[i] <= 'Z') {
-            type[i] += 'a' - 'A'; 
-        }
-    }
 
     bool type_found = false;
     for (auto poss_type: accepted_commands) {
@@ -203,14 +205,17 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
     destructor_class *destructor = new destructor_class();
 
     cursor_coords::get_instance()->set_cursor(destructor->get_screen_coords());
-    print_by_char("o", false, CONTROLLER_INFO_STYLE);
+    // print_by_char(map_object_str(map_object::DESTRUCTOR), false, CONTROLLER_INFO_STYLE);
+    // priting initial, empty scan -> prints destructor as well
+    destructor->print_scan();
 
+    // printing subsystem status starting with the same line as max scan range line
     COORD new_coords;
     new_coords.X = 0;
-    new_coords.Y = original_coords.Y + 1;
+    new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
     cursor_coords::get_instance()->set_cursor(new_coords);
     destructor->print_subsystem_status();
-    new_coords.Y--;
+    new_coords.Y = original_coords.Y;
     cursor_coords::get_instance()->set_cursor(new_coords);
     while (true) {
         std::string command = get_engineer_command();
@@ -222,47 +227,52 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
         std::string type  = parse_command_type(command, accepted_commands);
         int add_parameter = parse_command_parameter(command, type);
 
-        bool continue_loop = false;
+        bool skip_loop = false;
         // the two commands for these checks have already printed the error, all that remains is to continue;
         // AGAIN, I NEED TO GIVE IT TYPE NOT COMMAND AAAAAAA
         if (add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(type, add_parameter)) {
-            continue_loop = true;
+            skip_loop = true;
         }   
         
         // !!! update help
-        if (!continue_loop && type == "help") {
+        if (!skip_loop && type == "help") {
             for (auto command_type: accepted_commands) {
                 print_help(command_type);
             }
+            skip_loop = true;
         }
 
-        if (!continue_loop && type == "energy") {
+        if (!skip_loop && type == "energy") {
             destructor->generate_energy(add_parameter);
+            skip_loop = true;
         }
 
         // HERE I AM **NOT** SUPPOSED TO GIVE IT TYPE AAAA
         // THE ONE PLACE
-        if (!continue_loop) {
-            continue_loop = destructor->move(command.substr(0, command.find(' ')));
+        if (!skip_loop) {
+            skip_loop = destructor->move(command.substr(0, command.find(' ')));
         }
 
-        if (!continue_loop && type == "scan") {
+        if (!skip_loop && type == "scan") {
             destructor->scan(add_parameter);
+            skip_loop = true;
         }
 
         // this is for the training simulators
         // this has no reason to exist as an actual combat action
-        if (!continue_loop && type == "continue") {
+        if (!skip_loop && type == "continue") {
             clean_lines();
             return;
         }
 
+        new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
+        cursor_coords::get_instance()->set_cursor(new_coords);
         destructor->print_subsystem_status();
         destructor->print_scan();
+        new_coords.Y = original_coords.Y;
+        cursor_coords::get_instance()->set_cursor(new_coords);
 
-        combat_zone::get_instance()->debug_print();
-
-        // all that's left is to print the map, everything else should be good (hopefully, fingers crossed)
+        // combat_zone::get_instance()->debug_print();
 
         // clean last command
         clean_lines(original_coords.Y);

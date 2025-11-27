@@ -5,6 +5,17 @@
 #include "../connect_to_remote_controller.hpp"
 #include "../combat_zone/combat_zone.hpp"
 
+// print style for destructor info
+const print_style DESTRUCTOR_INFO_STYLE     =       {CYAN, BLUE, NOT_BRIGHT, NOT_BRIGHT};
+// print style for destructor info
+const print_style DESTRUCTOR_BAD_STYLE      =        {RED, BLUE, NOT_BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_OKAY_STYLE     =     {YELLOW, BLUE, NOT_BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_GOOD_STYLE     =      {GREEN, BLUE, NOT_BRIGHT, NOT_BRIGHT};
+// print style for obstacle on scan map
+const print_style DESTRUCTOR_OBSTACLE_STYLE = {YELLOW, CYAN, NOT_BRIGHT, NOT_BRIGHT};
+// print style for destructor on scan map
+const print_style DESTRUCTOR_SELF_STYLE     =  {GREEN, CYAN, NOT_BRIGHT, NOT_BRIGHT};
+
 // for checking input in move
 const int DIRECTION_NO = 4;
 const std::string DIRECTIONS = "wasd";
@@ -31,14 +42,12 @@ class destructor_class {
     // range, position (center), and map of last performed scan
     SHORT  scan_range;
     COORD scan_coords;
-    char scan_map[MAX_SCAN_RANGE][MAX_SCAN_RANGE];
+    map_object::enum_objects scan_map[2 * MAX_SCAN_RANGE + 1][2 * MAX_SCAN_RANGE + 1];
 
 public:
     destructor_class();
 
     COORD get_screen_coords();
-
-    void print_subsystem_status();
 
     // checks specifically if the destructor has enough energy for an action
     // and that its last cooldown has finished
@@ -55,6 +64,10 @@ public:
 
     void scan(int add_range = 0); 
 
+    // printing energy and cooldowns on screen
+    void print_subsystem_status();
+
+    // printing last scan on screen
     void print_scan();
 };
 
