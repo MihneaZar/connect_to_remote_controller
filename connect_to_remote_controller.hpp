@@ -51,7 +51,8 @@ std::string parse_command_type(const std::string command, const std::vector<std:
 // for now, we assume the parameter is a single digit, 
 // separated from the command by at least one space
 // returns PARAMETER_ERROR if it can't parse the parameter
-int parse_command_parameter(std::string command);
+// I need to check the TYPE here, duh...
+int parse_command_parameter(std::string command, std::string type);
 
 // function for creating a random remote controller name
 // (purely flavor text, at least for now)

@@ -19,22 +19,25 @@ destructor_class::destructor_class() {// setting it smack in the middle on the h
     scan_coords = map_coords;
 }
 
-bool destructor_class::check_energy_cooldown(std::string command, int parameter) {
-    // check cooldown
-    return true;
+void destructor_class::print_subsystem_status() {
+    std::string energy_level = "Energy level: [" + std::string(curr_energy_level, '|') + std::string(MAX_ENERGY_LEVEL - curr_energy_level, '-') + "]\n";
+    print_by_char(energy_level, false, CONTROLLER_INFO_STYLE);
+}
+
+bool destructor_class::check_energy_cooldown(std::string type, int parameter) {
 
     // if command is "energy", energy consumption is 0 (duh)
     // same goes for commands like "help" and "continue" (training simulators)
     int energy_consumption = 0;
-    if (DIRECTIONS.find(command) != std::string::npos) {
+    if (DIRECTIONS.find(type) != std::string::npos) {
         energy_consumption = 1;
     }
 
-    if (command == "scan") {
+    if (type == "scan") {
         energy_consumption = 2 * parameter;
     }
 
-    if (energy_consumption <= curr_energy_level) {
+    if (curr_energy_level < energy_consumption) {
         print_by_char("Error: energy level is too low.\n", false, CONTROLLER_ERROR_STYLE);
         return false;
     }
@@ -50,7 +53,7 @@ void destructor_class::generate_energy(int add_charge) {
     curr_energy_level += 1 + add_charge;
 }
 
-bool destructor_class::move(char command) {
+bool destructor_class::move(std::string command) {
     
     int direction = DIRECTIONS.find(command);
 
@@ -108,22 +111,22 @@ void destructor_class::scan(int add_range) {
     // we put an empty space (' ') so that legal positions
     // keep their expected position in the scan map
     // in printing, spaces won't have any effect
-    for (int i = 0; i < 2 * scan_range + 1; i++) {
-        for (int j = 0; j < 2 * scan_range + 1; i++) {
-            // checking that position is legal in map
-            // including map edges
-            if ((0 < i + top_left.X && i + top_left.X < combat_zone::get_instance()->get_map_size() + 2) 
-                && (0 < j + top_left.Y && j + top_left.Y < combat_zone::get_instance()->get_map_size() + 2)) {
+    // for (int i = 0; i < 2 * scan_range + 1; i++) {
+    //     for (int j = 0; j < 2 * scan_range + 1; i++) {
+    //         // checking that position is legal in map
+    //         // including map edges
+    //         if ((0 < i + top_left.X && i + top_left.X < combat_zone::get_instance()->get_map_size() + 2) 
+    //             && (0 < j + top_left.Y && j + top_left.Y < combat_zone::get_instance()->get_map_size() + 2)) {
                 
-                COORD map_pos;
-                map_pos.X = i + top_left.X;
-                map_pos.Y = j + top_left.Y;
-                scan_map[i][j] = combat_zone::get_instance()->get_map_object(map_pos);
-            } else {
-                scan_map[i][j] = map_object::EMPTY;
-            }
-        }
-    }
+    //             COORD map_pos;
+    //             map_pos.X = i + top_left.X;
+    //             map_pos.Y = j + top_left.Y;
+    //             scan_map[i][j] = combat_zone::get_instance()->get_map_object(map_pos);
+    //         } else {
+    //             scan_map[i][j] = map_object::EMPTY;
+    //         }
+    //     }
+    // }
 
     curr_energy_level -= 2 * add_range;
     // set cooldown + timestamp
@@ -137,16 +140,16 @@ void destructor_class::print_scan() {
     COORD new_coords;
     new_coords.X = screen_coords.X + d_move.X - scan_range;
     new_coords.Y = screen_coords.X + d_move.Y - scan_range;
-    cursor_coords::get_instance()->set_screen_coords(new_coords);
-    cursor_coords::get_instance()->set_cursor();
-    for (int i = std::max({0, (int) d_move.X}); i < std::min({(int) d_move.X, 2 * scan_range + 1}); i++) {
-        for (int j = std::max({0, (int) d_move.Y}); j < std::min({(int) d_move.Y, 2 * scan_range + 1}); j++) {
-        // style for scan map???
-            print_by_char(map_object_str(scan_map[i][j]));
-        }
-        new_coords.Y++;
-        cursor_coords::get_instance()->set_screen_coords(new_coords);
-        cursor_coords::get_instance()->set_cursor();
-    }
+    // cursor_coords::get_instance()->set_screen_coords(new_coords);
+    // cursor_coords::get_instance()->set_cursor();
+    // for (int i = std::max({0, (int) d_move.X}); i < std::min({(int) d_move.X, 2 * scan_range + 1}); i++) {
+    //     for (int j = std::max({0, (int) d_move.Y}); j < std::min({(int) d_move.Y, 2 * scan_range + 1}); j++) {
+    //     // style for scan map???
+    //         print_by_char(map_object_str(scan_map[i][j]));
+    //     }
+    //     new_coords.Y++;
+    //     cursor_coords::get_instance()->set_screen_coords(new_coords);
+    //     cursor_coords::get_instance()->set_cursor();
+    // }
 }
 

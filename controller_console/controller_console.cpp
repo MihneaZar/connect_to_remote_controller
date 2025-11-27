@@ -36,7 +36,12 @@ COORD cursor_coords::get_screen_coords() {
     return screen_coords;
 }
 
-void cursor_coords::set_cursor() {
+void cursor_coords::set_cursor(COORD new_coords) {
+    // check if ne screen coords were given
+    if (new_coords.X != -1) {
+        screen_coords = new_coords;
+    }
+
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
     GetConsoleScreenBufferInfo(hConsole, &csbiInfo);
@@ -105,8 +110,7 @@ void print_help(std::string command_type) {
 void print_by_char(std::string text, bool keep_original_coords, print_style style, int no_of_loading, bool cleanup) {
     // "Enter to continue."
     if (text == ENTER_TO_CONTINUE) {
-        cursor_coords::get_instance()->set_screen_coords({0, SCREEN_HEIGHT - 1});
-        cursor_coords::get_instance()->set_cursor();
+        cursor_coords::get_instance()->set_cursor({0, SCREEN_HEIGHT - 1});
         set_term_color(CONTROLLER_INFO_STYLE);
         std::cout << "Enter to continue.";
         while(getch() != ENTER);
@@ -126,8 +130,7 @@ void print_by_char(std::string text, bool keep_original_coords, print_style styl
             COORD new_coords;
             new_coords.X = 0;
             new_coords.Y = cursor_coords::get_instance()->get_screen_coords().Y + 1;
-            cursor_coords::get_instance()->set_screen_coords(new_coords);
-            cursor_coords::get_instance()->set_cursor();
+            cursor_coords::get_instance()->set_cursor(new_coords);
 
             // if screen is full (for text-filled introductions)
             if (!cleanup && cursor_coords::get_instance()->get_screen_coords().Y == SCREEN_HEIGHT - 1) {
@@ -143,8 +146,7 @@ void print_by_char(std::string text, bool keep_original_coords, print_style styl
             COORD new_coords;
             new_coords.X = 0;
             new_coords.Y = cursor_coords::get_instance()->get_screen_coords().Y + 1;
-            cursor_coords::get_instance()->set_screen_coords(new_coords);    
-            cursor_coords::get_instance()->set_cursor();
+            cursor_coords::get_instance()->set_cursor(new_coords);
         } else {
             if (length - i <= no_of_loading + 1) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -182,8 +184,7 @@ void print_by_char(std::string text, bool keep_original_coords, print_style styl
                 COORD new_coords;
                 new_coords.X = 0;
                 new_coords.Y = cursor_coords::get_instance()->get_screen_coords().Y + 1;
-                cursor_coords::get_instance()->set_screen_coords(new_coords);
-                cursor_coords::get_instance()->set_cursor();
+                cursor_coords::get_instance()->set_cursor(new_coords);
             }
         }
     }
@@ -204,8 +205,7 @@ void clean_lines(SHORT start_line, SHORT no_of_lines, bool keep_original_coords)
 
     COORD original_coords = cursor_coords::get_instance()->get_screen_coords();
 
-    cursor_coords::get_instance()->set_screen_coords({0, start_line});
-    cursor_coords::get_instance()->set_cursor();
+    cursor_coords::get_instance()->set_cursor({0, start_line});
     print_by_char(std::string(no_of_lines * SCREEN_WIDTH, ' '), true, CONTROLLER_INFO_STYLE, -1, true);
     if (keep_original_coords) {
         cursor_coords::get_instance()->set_screen_coords(original_coords);

@@ -85,8 +85,9 @@ public:
 
     COORD get_abs_coords();
 
+    // sets screen coords to given coords (if given)
     // sets cursor to new coordinates from screen_coords
-    void set_cursor();
+    void set_cursor(COORD new_coords = {-1, -1});
 };
 
 // terminal styles

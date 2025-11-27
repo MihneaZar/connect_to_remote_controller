@@ -37,17 +37,20 @@ class destructor_class {
 public:
     destructor_class();
 
+    void print_subsystem_status();
+
     // checks specifically if the destructor has enough energy for an action
     // and that its last cooldown has finished
     // parameter is for actions that can have an argument (scan, energy)
-    bool check_energy_cooldown(std::string command, int parameter = 0);
+    // CHECK TYPE
+    bool check_energy_cooldown(std::string type, int parameter = 0);
 
     // generates energy according to parameter
     void generate_energy(int add_charge = 0);
 
     // moves destructor if move is valid
     // returns energy consumption (1 if move happened, 0 otherwise)
-    bool move(char command);
+    bool move(std::string command);
 
     void scan(int add_range = 0); 
 

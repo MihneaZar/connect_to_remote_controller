@@ -113,6 +113,14 @@ std::string parse_command_type(const std::string command, const std::vector<std:
 
     bool type_found = false;
     for (auto poss_type: accepted_commands) {
+
+        // separate check for movement (w|a|s|d) command
+        if (poss_type == DIRECTIONS && DIRECTIONS.find(type) != std::string::npos) {
+            type = poss_type;
+            type_found = true;
+            break;
+        }
+
         type_found = true;
         for (int i = 0; i < length; i++) {
             if (type[i] != poss_type[i]) {
@@ -136,14 +144,21 @@ std::string parse_command_type(const std::string command, const std::vector<std:
     return type;
 }
 
-int parse_command_parameter(std::string command) {
+int parse_command_parameter(std::string command, std::string type) {
     // check if command can have parameter; if not, don't even worry about it
-    if (count(PARAMETER_ACTIONS.begin(), PARAMETER_ACTIONS.end(), command) == 0) {
+    // I need to check the TYPE here, duh...
+    if (count(PARAMETER_ACTIONS.begin(), PARAMETER_ACTIONS.end(), type) == 0) {
         return 0;
     }
 
     // first position of non-space character, after the command
-    int first_pos = command.find_first_not_of(command.find(' '));
+    // i forgor to add the thing im searching for =(((
+    int first_pos = command.find_first_not_of(' ', command.find(' ') + 1);
+
+    // no parameter was given
+    if (command.find(' ') == std::string::npos || first_pos == std::string::npos) {
+        return 0;
+    }
 
     // if command[first_pos] is not a number, print an error and return -1
     if (!('0' <= command[first_pos] && command[first_pos] <= '9')) {
@@ -188,49 +203,54 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
     combat_zone::get_instance()->init_map();
 
     destructor_class *destructor = new destructor_class();
+
+    cursor_coords::get_instance()->set_cursor({0, original_coords.Y + 1});
+    destructor->print_subsystem_status();
+    cursor_coords::get_instance()->set_cursor({0, original_coords.Y});
     while (true) {
         std::string command = get_engineer_command();
 
         // clean response to command (such as command list) -> needs to be before parsing,
         // so as to not delete the errors printed by it
-        clean_lines(original_coords.Y + 1, 3);
+        clean_lines(original_coords.Y + 1, accepted_commands.size());
 
         std::string type  = parse_command_type(command, accepted_commands);
-        int add_parameter = parse_command_parameter(command);
+        int add_parameter = parse_command_parameter(command, type);
 
+        bool continue_loop = false;
         // the two commands for these checks have already printed the error, all that remains is to continue;
-        if (add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(command, add_parameter)) {
-            // clean last command
-            clean_lines(original_coords.Y);
-            continue;
+        // AGAIN, I NEED TO GIVE IT TYPE NOT COMMAND AAAAAAA
+        if (add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(type, add_parameter)) {
+            continue_loop = true;
         }   
         
         // !!! update help
-        if (type == "help") {
+        if (!continue_loop && type == "help") {
             for (auto command_type: accepted_commands) {
                 print_help(command_type);
             }
         }
 
-        if (type == "energy") {
+        if (!continue_loop && type == "energy") {
             destructor->generate_energy(add_parameter);
         }
 
-        // checking just first character for direction (w|a|s|d)
-        if (command[1] == ' ' && destructor->move(command[0])) {
-            continue;
+        if (!continue_loop) {
+            continue_loop = destructor->move(type);
         }
 
-        if (type == "scan") {
+        if (!continue_loop && type == "scan") {
             destructor->scan(add_parameter);
         }
 
         // this is for the training simulators
         // this has no reason to exist as an actual combat action
-        if (type == "continue") {
+        if (!continue_loop && type == "continue") {
             clean_lines();
             return;
         }
+
+        destructor->print_subsystem_status();
 
         // all that's left is to print the map, everything else should be good (hopefully, fingers crossed)
 
