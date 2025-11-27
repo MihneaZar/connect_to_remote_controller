@@ -79,14 +79,14 @@ bool destructor_class::check_energy_cooldown(std::string type, int parameter) {
 }
 
 void destructor_class::generate_energy(int add_charge) {
-    if (MAX_ENERGY_LEVEL < curr_energy_level + 1 + add_charge) {
+    if (MAX_ENERGY_LEVEL < curr_energy_level + 1 + 2 * add_charge) {
         print_by_char("Error: energy level too high, generator may overload.\n", false, CONTROLLER_ERROR_STYLE);
         return;
     }
 
     uint64_t cooldown_time = (2 + pow(2, add_charge)) * 1000;
     cooldown["Generator"] = {current_time_ms(), cooldown_time}; 
-    curr_energy_level += 1 + add_charge;
+    curr_energy_level += 1 + 2 * add_charge;
 }
 
 bool destructor_class::move(std::string command) {

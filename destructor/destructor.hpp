@@ -89,10 +89,4 @@ public:
     void print_scan();
 };
 
-
-
-
-
-
-
 #endif
