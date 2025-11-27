@@ -2,19 +2,25 @@
 
 #define DESTRUCTOR_ACTIONS_HPP
 
-#include "../connect_to_remote_controller.hpp"
+#include "../controller_console/controller_console.hpp"
 #include "../combat_zone/combat_zone.hpp"
+#include "../timer/timer.hpp"
+#include <vector>
+#include <math.h> // for poooooow          
+#include <map>  // for the cooldowns
 
 // print style for destructor info
-const print_style DESTRUCTOR_INFO_STYLE     =       {CYAN, BLUE, NOT_BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_INFO_STYLE     =   {CYAN, BLUE, BRIGHT, NOT_BRIGHT};
 // print style for destructor info
-const print_style DESTRUCTOR_BAD_STYLE      =        {RED, BLUE, NOT_BRIGHT, NOT_BRIGHT};
-const print_style DESTRUCTOR_OKAY_STYLE     =     {YELLOW, BLUE, NOT_BRIGHT, NOT_BRIGHT};
-const print_style DESTRUCTOR_GOOD_STYLE     =      {GREEN, BLUE, NOT_BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_RED_STYLE      =    {RED, BLUE, BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_YELLOW_STYLE   = {YELLOW, BLUE, BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_GREEN_STYLE    =  {GREEN, BLUE, BRIGHT, NOT_BRIGHT};
 // print style for obstacle on scan map
-const print_style DESTRUCTOR_OBSTACLE_STYLE = {YELLOW, CYAN, NOT_BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_OBSTACLE_STYLE = {YELLOW, CYAN, BRIGHT, NOT_BRIGHT};
 // print style for destructor on scan map
-const print_style DESTRUCTOR_SELF_STYLE     =  {GREEN, CYAN, NOT_BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_SELF_STYLE     =  {GREEN, CYAN, BRIGHT, NOT_BRIGHT};
+
+const std::vector<std::string> DESTRUCTOR_SYSTEMS = {"Generator", "Engine", "Scanner"};
 
 // for checking input in move
 const int DIRECTION_NO = 4;
@@ -25,9 +31,17 @@ const COORD D_MOVE[] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 // could be higher in the future for heavy destructors
 const int MAX_ENERGY_LEVEL = 10;
 
-const int MAX_SCAN_RANGE      = 5;
-const int MAX_SCAN_ADD_RANGE  = 3;
-const int BASE_SCAN_RANGE     = 2;
+// structure to keep track of cooldowns
+struct command_cooldown {
+    // the time when ability was last used (in ms)
+    uint64_t    time_stamp;
+    // the amount of time of cooldown (in ms)
+    uint64_t cooldown_time;
+};
+
+const int MAX_SCAN_RANGE     = 5;
+const int MAX_SCAN_ADD_RANGE = 3;
+const int BASE_SCAN_RANGE    = 2;
 
 // this is the destructor class
 // technically, only one destructor makes sense to exist at a time
@@ -36,6 +50,8 @@ const int BASE_SCAN_RANGE     = 2;
 class destructor_class {
     // coordinates on the screen (fixed in place), coordinates on the game map
     COORD screen_coords, map_coords;
+
+    std::map<std::string, command_cooldown> cooldown;
 
     SHORT curr_energy_level;
 
@@ -48,6 +64,8 @@ public:
     destructor_class();
 
     COORD get_screen_coords();
+
+    static std::string command_type_to_system(std::string type);
 
     // checks specifically if the destructor has enough energy for an action
     // and that its last cooldown has finished

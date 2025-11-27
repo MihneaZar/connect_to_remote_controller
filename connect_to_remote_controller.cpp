@@ -107,6 +107,10 @@ std::string get_engineer_command() {
 }
 
 std::string parse_command_type(const std::string command, const std::vector<std::string> accepted_commands) {
+    if (command == "") {
+        return "";
+    }
+
     std::string type = command.substr(0, command.find(' '));
 
     int length = type.length();
@@ -228,9 +232,13 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
         int add_parameter = parse_command_parameter(command, type);
 
         bool skip_loop = false;
+        if (type == "" || type == "error") {
+            skip_loop = true;
+        }
+
         // the two commands for these checks have already printed the error, all that remains is to continue;
         // AGAIN, I NEED TO GIVE IT TYPE NOT COMMAND AAAAAAA
-        if (add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(type, add_parameter)) {
+        if (!skip_loop && add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(type, add_parameter)) {
             skip_loop = true;
         }   
         
@@ -359,6 +367,10 @@ void init_controller() {
         // controller ends
         if (type == "exit") {
             return;
+        }
+
+        if (type == "") {  
+            print_by_char("Error: Unknown command. Type 'h[elp]' to list commands.\n", false, CONTROLLER_ERROR_STYLE);
         }
 
         // clean last command

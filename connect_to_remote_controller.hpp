@@ -37,8 +37,9 @@ const int PARAMETER_ERROR = -1;
 // list of possible commands for each phase
 // important for commands with identical starting letters (see "s" for south and "sc" for scan):
 // put first the one with less starting letters (if it's only s, it's south, if it's sc, s will fail, then scan will succeed)
+// blank command for destructor gameplay, in order to get an updated status
 const std::vector<std::string> INIT_COMMANDS      = {"start", "help", "exit"};
-const std::vector<std::string> SIMULATOR_MOVEMENT = {"energy", "wasd", "scan", "help", "continue"};
+const std::vector<std::string> SIMULATOR_MOVEMENT = {"", "energy", "wasd", "scan", "help", "continue"};
 const std::vector<std::string> OPERATION_COMMANDS = {"help", "start", "exit"};
 // actions that can have a parameter
 const std::vector<std::string> PARAMETER_ACTIONS  = {"energy", "scan"};

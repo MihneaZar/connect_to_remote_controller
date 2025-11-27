@@ -15,6 +15,11 @@ destructor_class::destructor_class() {// setting it smack in the middle on the h
     // map_coords.Y = combat_zone::get_instance()->get_map_size();
     combat_zone::get_instance()->set_map_object(map_coords, map_object::DESTRUCTOR);
 
+    // initialising all cooldowns to 0
+    for (auto command: DESTRUCTOR_SYSTEMS) {
+        cooldown[command] = {current_time_ms(), 0};
+    }
+
     curr_energy_level = MAX_ENERGY_LEVEL;
     
     // setting initial scan at range 0, with center in destructor map_coords
@@ -27,7 +32,32 @@ COORD destructor_class::get_screen_coords() {
     return screen_coords;
 }
 
+std::string destructor_class::command_type_to_system(std::string type) {
+    if (type == "energy") {
+        return "Generator";
+    }
+    
+    if (type == "wasd") {
+        return "Engine";
+    }
+    
+    if (type == "scan") {
+        return "Scanner";
+    }
+
+    return "";
+}
+
 bool destructor_class::check_energy_cooldown(std::string type, int parameter) {
+    // checking command cooldown
+    // we're only checking down to tens of ms (since that's what we're also printing)
+    // cursor_coords::get_instance()->print_debug(std::to_string(time_ms_since(cooldown[type].time_stamp) / 10) + " " + std::to_string(cooldown[type].cooldown_time / 10) + "\n");
+    
+    std::string subsystem = command_type_to_system(type);
+    if (time_ms_since(cooldown[subsystem].time_stamp) / 10 < cooldown[subsystem].cooldown_time / 10) {
+        print_by_char(subsystem + " is in cooldown.\n", false, CONTROLLER_ERROR_STYLE);
+        return false;
+    }
 
     // if command is "energy", energy consumption is 0 (duh)
     // same goes for commands like "help" and "continue" (training simulators)
@@ -53,6 +83,9 @@ void destructor_class::generate_energy(int add_charge) {
         print_by_char("Error: energy level too high, generator may overload.\n", false, CONTROLLER_ERROR_STYLE);
         return;
     }
+
+    uint64_t cooldown_time = (2 + pow(2, add_charge)) * 1000;
+    cooldown["Generator"] = {current_time_ms(), cooldown_time}; 
     curr_energy_level += 1 + add_charge;
 }
 
@@ -79,8 +112,9 @@ bool destructor_class::move(std::string command) {
 
             // change new destructor position to DESTRUCTOR
             combat_zone::get_instance()->set_map_object(new_position, map_object::DESTRUCTOR);
+
+            cooldown["Engine"] = {current_time_ms(), 1000};
             curr_energy_level--;
-            // set cooldown + timestamp
             break;
 
         case map_object::OBSTACLE: 
@@ -137,16 +171,34 @@ void destructor_class::scan(int add_range) {
         // cursor_coords::get_instance()->print_debug("\n");
     }
 
+    uint64_t cooldown_time = (3 + add_range) * 1000;
+    cooldown["Scanner"] = {current_time_ms(), cooldown_time};
     curr_energy_level -= 2 * add_range;
-    // set cooldown + timestamp
 }
 
 void destructor_class::print_subsystem_status() {
     std::string energy_level = "Energy level: [" + std::string(curr_energy_level, '|') + std::string(MAX_ENERGY_LEVEL - curr_energy_level, '-') + "]\n";
     print_by_char("Energy level: [", false, DESTRUCTOR_INFO_STYLE);
-    print_by_char(std::string(curr_energy_level, '|'), false, DESTRUCTOR_GOOD_STYLE);
-    print_by_char(std::string(MAX_ENERGY_LEVEL - curr_energy_level, '-'), false, DESTRUCTOR_OKAY_STYLE);
-    print_by_char("]", false, DESTRUCTOR_INFO_STYLE);
+    print_by_char(std::string(curr_energy_level, '|'), false, DESTRUCTOR_GREEN_STYLE);
+    print_by_char(std::string(MAX_ENERGY_LEVEL - curr_energy_level, '-'), false, DESTRUCTOR_YELLOW_STYLE);
+    print_by_char("]\n", false, DESTRUCTOR_INFO_STYLE);
+    for (auto command: DESTRUCTOR_SYSTEMS) {
+
+        // we're only printing down to tens of ms
+        int time_left = (cooldown[command].cooldown_time - (time_ms_since(cooldown[command].time_stamp))) / 10;
+        print_by_char(command + ": ", false, DESTRUCTOR_INFO_STYLE);
+
+        if (0 < time_left) {
+            int tens     = time_left % 100 / 10 % 10;
+            int hundreds = time_left % 10;
+
+            // printing in seconds
+            print_by_char(std::to_string(time_left / 100) + "." + std::to_string(tens) + std::to_string(hundreds), false, DESTRUCTOR_RED_STYLE);
+        } else {
+            print_by_char("0.00", false, DESTRUCTOR_GREEN_STYLE);  
+        }
+        print_by_char(" s\n", false, DESTRUCTOR_INFO_STYLE);
+    }
 }
 
 void destructor_class::print_scan() {
