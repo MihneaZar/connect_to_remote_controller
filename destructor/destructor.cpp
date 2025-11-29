@@ -5,14 +5,12 @@ destructor_class::destructor_class() {// setting it smack in the middle on the h
     screen_coords.X = (SCREEN_WIDTH + 1) / 2;
     screen_coords.Y = SCREEN_HEIGHT - 1 - MAX_SCAN_RANGE;
 
-    // spawning destructor roughly in the middle of the map
-    // values here chosen arbitrarilly (maybe should change magic numbers)
-    map_coords.X = combat_zone::get_instance()->get_map_size() / 2 + rand() % 11 - 5;
-    map_coords.Y = combat_zone::get_instance()->get_map_size() / 2 + rand() % 11 - 5;
-    // map_coords.X = 1;
-    // map_coords.Y = 1;
-    // map_coords.X = combat_zone::get_instance()->get_map_size();
-    // map_coords.Y = combat_zone::get_instance()->get_map_size();
+    // spawning destructor in the middle of the map
+    // it's gonna be at map_size / 2 +/- map_size / 5
+    int map_size      = combat_zone::get_instance()->get_map_size();
+    int max_variation = map_size / 5;
+    map_coords.X = map_size / 2 + rand() % (2 * max_variation + 1) - max_variation;
+    map_coords.Y = map_size / 2 + rand() % (2 * max_variation + 1) - max_variation;
     combat_zone::get_instance()->set_map_object(map_coords, map_object::DESTRUCTOR);
 
     // initialising all cooldowns to 0
@@ -32,6 +30,10 @@ COORD destructor_class::get_screen_coords() {
     return screen_coords;
 }
 
+COORD destructor_class::get_map_coords() {
+    return map_coords;
+}
+
 std::string destructor_class::command_type_to_system(std::string type) {
     if (type == "energy") {
         return "Generator";
@@ -48,11 +50,42 @@ std::string destructor_class::command_type_to_system(std::string type) {
     return "";
 }
 
+int destructor_class::calculate_cooldown(std::string type, int parameter) {
+    if (type == "energy") {
+        return 2 + pow(2, parameter);
+    }
+
+    if (type == "wasd") {
+        return 0.5;
+    }
+
+    if (type == "scan") {
+        return 3 + parameter;
+    }
+
+    return 0;
+}
+
+int destructor_class::calculate_energy(std::string type, int parameter) {
+    // remember, this is energy GAINED
+    if (type == "energy") {
+        return 1 + 2 * parameter;
+    }
+
+    if (type == "wasd") {
+        return 1;
+    }
+
+    if (type == "scan") {
+        return 2 * parameter;
+    }
+
+    return 0;
+}
+
 bool destructor_class::check_energy_cooldown(std::string type, int parameter) {
     // checking command cooldown
-    // we're only checking down to tens of ms (since that's what we're also printing)
-    // cursor_coords::get_instance()->print_debug(std::to_string(time_ms_since(cooldown[type].time_stamp) / 10) + " " + std::to_string(cooldown[type].cooldown_time / 10) + "\n");
-    
+    // we're only checking down to tens of ms (since that's what we're also printing)  
     std::string subsystem = command_type_to_system(type);
     if (time_ms_since(cooldown[subsystem].time_stamp) / 10 < cooldown[subsystem].cooldown_time / 10) {
         print_by_char(subsystem + " is in cooldown.\n", false, CONTROLLER_ERROR_STYLE);
@@ -62,12 +95,8 @@ bool destructor_class::check_energy_cooldown(std::string type, int parameter) {
     // if command is "energy", energy consumption is 0 (duh)
     // same goes for commands like "help" and "continue" (training simulators)
     int energy_consumption = 0;
-    if (DIRECTIONS.find(type) != std::string::npos) {
-        energy_consumption = 1;
-    }
-
-    if (type == "scan") {
-        energy_consumption = 2 * parameter;
+    if (type != "energy") {
+        energy_consumption = calculate_energy(type, parameter);
     }
 
     if (curr_energy_level < energy_consumption) {
@@ -79,14 +108,16 @@ bool destructor_class::check_energy_cooldown(std::string type, int parameter) {
 }
 
 void destructor_class::generate_energy(int add_charge) {
-    if (MAX_ENERGY_LEVEL < curr_energy_level + 1 + 2 * add_charge) {
+    int added_energy = calculate_energy("energy", add_charge);
+
+    if (MAX_ENERGY_LEVEL < curr_energy_level + added_energy) {
         print_by_char("Error: energy level too high, generator may overload.\n", false, CONTROLLER_ERROR_STYLE);
         return;
     }
 
-    uint64_t cooldown_time = (2 + pow(2, add_charge)) * 1000;
+    uint64_t cooldown_time = calculate_cooldown("energy", add_charge) * 1000;
     cooldown["Generator"] = {current_time_ms(), cooldown_time}; 
-    curr_energy_level += 1 + 2 * add_charge;
+    curr_energy_level += added_energy;
 }
 
 bool destructor_class::move(std::string command) {
@@ -113,8 +144,8 @@ bool destructor_class::move(std::string command) {
             // change new destructor position to DESTRUCTOR
             combat_zone::get_instance()->set_map_object(new_position, map_object::DESTRUCTOR);
 
-            cooldown["Engine"] = {current_time_ms(), 1000};
-            curr_energy_level--;
+            cooldown["Engine"] = {current_time_ms(), (uint64_t) calculate_cooldown("wasd") * 1000};
+            curr_energy_level -= calculate_energy("wasd");
             break;
 
         case map_object::OBSTACLE: 
@@ -171,9 +202,9 @@ void destructor_class::scan(int add_range) {
         // cursor_coords::get_instance()->print_debug("\n");
     }
 
-    uint64_t cooldown_time = (3 + add_range) * 1000;
+    uint64_t cooldown_time = calculate_cooldown("scan", add_range) * 1000;
     cooldown["Scanner"] = {current_time_ms(), cooldown_time};
-    curr_energy_level -= 2 * add_range;
+    curr_energy_level -= calculate_energy("scan", add_range);
 }
 
 void destructor_class::print_subsystem_status() {
@@ -181,7 +212,7 @@ void destructor_class::print_subsystem_status() {
     print_by_char("Energy level: [", false, DESTRUCTOR_INFO_STYLE);
     print_by_char(std::string(curr_energy_level, '|'), false, DESTRUCTOR_GREEN_STYLE);
     print_by_char(std::string(MAX_ENERGY_LEVEL - curr_energy_level, '-'), false, DESTRUCTOR_YELLOW_STYLE);
-    print_by_char("]\n", false, DESTRUCTOR_INFO_STYLE);
+    print_by_char("]\n\nSubsystem status:\n", false, DESTRUCTOR_INFO_STYLE);
     for (auto command: DESTRUCTOR_SYSTEMS) {
 
         // we're only printing down to tens of ms

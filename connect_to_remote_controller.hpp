@@ -7,8 +7,9 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #include "controller_console/controller_console.hpp"
-#include "destructor/destructor.hpp"
 #include "combat_zone/combat_zone.hpp"
+#include "destructor/destructor.hpp"
+#include "venator/venator.hpp"
 #include <bits/stdc++.h> // for count (checking if value is in vector) - goddamn another include y a y
 #include <openssl/evp.h> // for the md5 hashing (jesus christ that took forever)
 #include <cstdlib>       // good ol' rand()
@@ -65,7 +66,9 @@ std::string random_password();
 
 // main mission loop
 // accepted commands for simulators (and perhaps different types of destructors in the future)
-void mission_loop(const std::vector<std::string> accepted_commands);
+// receiving destructor and venator from outside so that the destructor type and venator type can be established there
+// if venator is nullptr, then there is no venator (for simulator movement for now, perhaps very low chance of there not being a venator)
+void mission_loop(const std::vector<std::string> accepted_commands, destructor_class *destructor, venator_class *venator = nullptr);
 
 // this is basically the tutorial (with some flavor text sprinkled between phases)
 void training_simulator();

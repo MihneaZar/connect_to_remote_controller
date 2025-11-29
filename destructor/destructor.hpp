@@ -1,24 +1,25 @@
-#ifndef DESTRUCTOR_ACTIONS_HPP
+#ifndef DESTRUCTOR_HPP
 
-#define DESTRUCTOR_ACTIONS_HPP
+#define DESTRUCTOR_HPP
 
 #include "../controller_console/controller_console.hpp"
 #include "../combat_zone/combat_zone.hpp"
 #include "../timer/timer.hpp"
+#include <string> // for to_string
 #include <vector>
 #include <math.h> // for poooooow          
-#include <map>  // for the cooldowns
+#include <map>    // for the cooldowns
 
 // print style for destructor info
-const print_style DESTRUCTOR_INFO_STYLE     =   {CYAN, BLUE, BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_INFO_STYLE     =       {CYAN, BLUE, BRIGHT, NOT_BRIGHT};
 // print style for destructor info
 const print_style DESTRUCTOR_RED_STYLE      =    {RED, BLUE, BRIGHT, NOT_BRIGHT};
-const print_style DESTRUCTOR_YELLOW_STYLE   = {YELLOW, BLUE, BRIGHT, NOT_BRIGHT};
-const print_style DESTRUCTOR_GREEN_STYLE    =  {GREEN, BLUE, BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_YELLOW_STYLE   = {YELLOW, BLUE, NOT_BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_GREEN_STYLE    =      {GREEN, BLUE, BRIGHT, NOT_BRIGHT};
 // print style for obstacle on scan map
-const print_style DESTRUCTOR_OBSTACLE_STYLE = {YELLOW, CYAN, BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_OBSTACLE_STYLE =     {YELLOW, CYAN, BRIGHT, NOT_BRIGHT};
 // print style for destructor on scan map
-const print_style DESTRUCTOR_SELF_STYLE     =  {GREEN, CYAN, BRIGHT, NOT_BRIGHT};
+const print_style DESTRUCTOR_SELF_STYLE     =      {GREEN, CYAN, NOT_BRIGHT, NOT_BRIGHT};
 
 const std::vector<std::string> DESTRUCTOR_SYSTEMS = {"Generator", "Engine", "Scanner"};
 
@@ -60,10 +61,18 @@ class destructor_class {
     COORD scan_coords;
     map_object::enum_objects scan_map[2 * MAX_SCAN_RANGE + 1][2 * MAX_SCAN_RANGE + 1];
 
+    // functions for calculating cooldown time and energy cost
+    // for every command (so that i can change them directly here)
+    int calculate_cooldown(std::string type, int parameter = 0);
+
+    // for energy command, this will output energy gained, not lost
+    int calculate_energy(std::string type, int parameter = 0);
+
 public:
     destructor_class();
 
     COORD get_screen_coords();
+    COORD get_map_coords();
 
     static std::string command_type_to_system(std::string type);
 

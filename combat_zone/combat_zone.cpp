@@ -26,6 +26,13 @@ combat_zone* combat_zone::get_instance() {
     return instance;
 }
 
+bool combat_zone::check_previous_positions(int line, int column) {
+    return area_map[line - 1][column - 1] != map_object::OBSTACLE 
+        && area_map[line - 1][column] != map_object::OBSTACLE
+        && area_map[line - 1][column + 1] != map_object::OBSTACLE
+        && area_map[line][column - 1] != map_object::OBSTACLE;
+}   
+
 void combat_zone::init_map(SHORT size) {
     map_size = size;
 
@@ -50,7 +57,7 @@ void combat_zone::init_map(SHORT size) {
         for (int j = 1; j <= map_size; j++) {
 
             // percentage between 1 and 100
-            if ((rand() % 100 + 1) <= OBSTACLE_CHANCE) {
+            if (check_previous_positions(i, j) && (rand() % 100 + 1) <= OBSTACLE_CHANCE) {
                 area_map[i][j] = map_object::OBSTACLE;
             } else {
                 area_map[i][j] = map_object::EMPTY;

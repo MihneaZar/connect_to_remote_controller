@@ -3,9 +3,7 @@
 #define COMBAT_ZONE_HPP
 
 #include "../controller_console/controller_console.hpp"
-#include <windows.h> // SHORT 
 #include <cstdlib>   // good ol' rand()
-#include <string>
 
 namespace map_object {
     // enum for character objects on the map
@@ -58,6 +56,12 @@ class combat_zone {
 
     // private constructor
     combat_zone() {}
+
+    // checks if there is an obstacle in the previous positions
+    // (the three above positions and the behind one)
+    // this is to keep at least a distance of one between obstacles
+    // (makes for a much easier venator seeking algorithm)
+    bool check_previous_positions(int line, int column);
 
 public:
     // Deleting the copy constructor to prevent copies

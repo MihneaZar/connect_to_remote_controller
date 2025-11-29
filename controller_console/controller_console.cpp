@@ -105,7 +105,7 @@ void print_help(std::string command_type) {
         print_by_char("-> c[ontinue] = move onto the next training phase\n", false, CONTROLLER_INFO_STYLE);
     }
     if (command_type == "energy") {
-        print_by_char("-> e[nergy] [add_charge in (1..3)]: generate (1 + add_charge) energy, 0e, (2 + 2^add_charge)s\n", false, CONTROLLER_INFO_STYLE);
+        print_by_char("-> e[nergy] [add_charge in (1..3)]: generate (1 + 2 * add_charge) energy, 0e, (2 + 2^add_charge)s\n", false, CONTROLLER_INFO_STYLE);
     }
     if (command_type == "wasd") {
         print_by_char("-> (w|a|s|d): movement, 1e, 1s\n", false, CONTROLLER_INFO_STYLE);

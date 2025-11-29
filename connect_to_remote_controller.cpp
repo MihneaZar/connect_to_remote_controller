@@ -197,20 +197,12 @@ std::string random_password() {
     return password;
 }
 
-void mission_loop(const std::vector<std::string> accepted_commands) {
+void mission_loop(const std::vector<std::string> accepted_commands, destructor_class *destructor, venator_class *venator) {
     // keeping the original coords, so that this function can be generalized
     // rather than starting on line 1, or any other specific line, it starts
     // on line original_coords.Y
     COORD original_coords = cursor_coords::get_instance()->get_screen_coords();
 
-    // initialise map
-    combat_zone::get_instance()->init_map();
-
-    destructor_class *destructor = new destructor_class();
-
-    cursor_coords::get_instance()->set_cursor(destructor->get_screen_coords());
-    // print_by_char(map_object_str(map_object::DESTRUCTOR), false, CONTROLLER_INFO_STYLE);
-    // priting initial, empty scan -> prints destructor as well
     destructor->print_scan();
 
     // printing subsystem status starting with the same line as max scan range line
@@ -222,6 +214,10 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
     new_coords.Y = original_coords.Y;
     cursor_coords::get_instance()->set_cursor(new_coords);
     while (true) {
+        if (venator != nullptr) {
+            venator->action(destructor);
+        }
+
         std::string command = get_engineer_command();
 
         // clean response to command (such as command list) -> needs to be before parsing,
@@ -280,7 +276,7 @@ void mission_loop(const std::vector<std::string> accepted_commands) {
         new_coords.Y = original_coords.Y;
         cursor_coords::get_instance()->set_cursor(new_coords);
 
-        // combat_zone::get_instance()->debug_print();
+        combat_zone::get_instance()->debug_print();
 
         // clean last command
         clean_lines(original_coords.Y);
@@ -301,21 +297,25 @@ void training_simulator() {
     print_by_char();
 
     print_by_char("Alright, before we pit you against a simulated venator, let's get you used to the controls.\n", false, CONTROLLER_INFO_STYLE);
-    print_by_char("Remember this: although the RC can only send you snapshots of the system, it's all happening in real time - and time is of the essence.\n", false, CONTROLLER_INFO_STYLE);
+    print_by_char("Remember this: although the RC can only send you snapshots of the system's status, it's all happening in real time - and time is of the essence.\n", false, CONTROLLER_INFO_STYLE);
     print_by_char("On top of that, each subsystem has its limitations: its abilities require energy, which you need to manually recharge, and they also have a cooldown.\n", false, CONTROLLER_INFO_STYLE);
     print_by_char("That said, get used to the controls in this first simulation, then hit 'c[ontinue]'.\n", false, CONTROLLER_INFO_STYLE);
-    mission_loop(SIMULATOR_MOVEMENT);
 
-    print_by_char("Now, the first ", false, CONTROLLER_INFO_STYLE);
-    print_by_char("essential ", false, CONTROLLER_INFO_STYLE);
-    print_by_char("lesson: ", false, CONTROLLER_INFO_STYLE);
-    print_by_char("Keep. It. Away.\n", false, CONTROLLER_ERROR_STYLE);
+    // initialise map
+    combat_zone::get_instance()->init_map();
+    mission_loop(SIMULATOR_MOVEMENT, new destructor_class);
+
+    print_by_char("Now, the first essential lesson: ", false, CONTROLLER_INFO_STYLE);
+    print_by_char("Stay. Away. From the venator.\n", false, CONTROLLER_ERROR_STYLE);
     print_by_char("Before you worry yourself with how to fight it off, you need to remember one crucial detail - ", false, CONTROLLER_INFO_STYLE);
     print_by_char("a single slice ", false, CONTROLLER_ERROR_STYLE);
     print_by_char("of its blade-like appendages, and the ", false, CONTROLLER_INFO_STYLE);
     print_by_char("destructor is done.\n", false, CONTROLLER_ERROR_STYLE);
     print_by_char("On the very small off chance it misses the main structure of the generator, you may still end up with a broken subsystem: a generator with a lower capacity and energy output, slower tracks, scanner errors, and so on.", false, CONTROLLER_INFO_STYLE);
-    print_by_char();
+    // print_by_char();
+
+    combat_zone::get_instance()->init_map(MEDIUM_MAP_SIZE);
+    mission_loop(SIMULATOR_MOVEMENT, new destructor_class, new venator_class);
 }
 
 void init_controller() {
@@ -400,7 +400,7 @@ std::string md5(const std::string content) {
     const EVP_MD* md = EVP_md5();
     unsigned char md_value[EVP_MAX_MD_SIZE];
     unsigned int  md_len;
-    std::string        output;
+    std::string output;
 
     EVP_DigestInit_ex2(context, md, NULL);
     EVP_DigestUpdate(context, content.c_str(), content.length());
