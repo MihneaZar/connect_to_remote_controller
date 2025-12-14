@@ -311,8 +311,9 @@ void training_simulator() {
     print_by_char("a single slice ", false, CONTROLLER_ERROR_STYLE);
     print_by_char("of its blade-like appendages, and the ", false, CONTROLLER_INFO_STYLE);
     print_by_char("destructor is done.\n", false, CONTROLLER_ERROR_STYLE);
-    print_by_char("On the very small off chance it misses the main structure of the generator, you may still end up with a broken subsystem: a generator with a lower capacity and energy output, slower tracks, scanner errors, and so on.", false, CONTROLLER_INFO_STYLE);
+    print_by_char("On the very small off chance it misses the main structure of the generator, you may still end up with a broken subsystem: a generator with a lower capacity and energy output, slower tracks, scanner errors, and so on. Before proceding, press any button to activate the simulated venator.\n", false, CONTROLLER_INFO_STYLE);
     // print_by_char();
+    char input = getch();
 
     combat_zone::get_instance()->init_map(MEDIUM_MAP_SIZE);
     mission_loop(SIMULATOR_MOVEMENT, new destructor_class, new venator_class);

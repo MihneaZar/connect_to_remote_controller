@@ -9,3 +9,9 @@ RC = remote controller
 S  = system  
 D  = destructor
 V  = venator
+
+
+
+// forget about everything from before
+you have very little time (~0.1s) to save the system
+every action takes a tiny fraction of time, partially random
