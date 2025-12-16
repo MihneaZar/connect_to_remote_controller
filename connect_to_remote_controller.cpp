@@ -320,16 +320,14 @@ void training_simulator() {
 }
 
 void init_controller() {
-    set_term_color(CONTROLLER_TYPE_STYLE);
-
     cursor_coords::get_instance()->init_coords();
     cursor_coords::get_instance()->set_cursor();
 
-    print_by_char("Searching for active controller...\n", false, CONTROLLER_INFO_STYLE, 3);
+    print_by_char("Searching for active controller\\l.\n", false, CONTROLLER_INFO_STYLE, rand() % 3 + 1);
     // rand() % 94 + 33 gives a number between 33 and 126, which is (approximately) where "normal" chars (usable for the name) are
     std::string random_name = {rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum()};
     print_by_char("Remote controller found: RC" + random_name + ".\n", false, CONTROLLER_INFO_STYLE);
-    print_by_char("Establishing connection...\n", false, CONTROLLER_INFO_STYLE, 3);
+    print_by_char("Establishing connection\\l.\n", false, CONTROLLER_INFO_STYLE, rand() % 2 + 1);
     print_by_char("Success! You are now connected to remote controller RC" + random_name + ".\n", false, CONTROLLER_SUCCES_STYLE);
 
     // init RC loop
@@ -356,11 +354,13 @@ void init_controller() {
             print_by_char("-", false, CONTROLLER_INFO_STYLE);
             print_by_char("advised", false, CONTROLLER_ERROR_STYLE);
             print_by_char(" to operate an RC unit without proper training.\nY[es]/N[o]\n", false, CONTROLLER_INFO_STYLE);
-
+            cursor_coords::get_instance()->toggle_cursor();
+            
             char input = getch();
             while (!(input == 'y' || input == 'Y') && !(input == 'n' || input == 'N')) {
                 input = getch();
             }
+            cursor_coords::get_instance()->toggle_cursor();
 
             clean_lines(0, 4);
             if (input == 'y' || input == 'Y') {

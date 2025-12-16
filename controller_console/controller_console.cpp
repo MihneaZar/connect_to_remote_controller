@@ -51,11 +51,20 @@ void cursor_coords::set_cursor(COORD new_coords) {
 }
 
 void cursor_coords::print_debug(std::string text) {
-
     // openning and closing debug to see changes real time
     debug.open("debug.txt", std::ios_base::app);
     debug << text;
     debug.close();
+}
+
+void cursor_coords::toggle_cursor() {
+    show_cursor = !show_cursor;
+
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO ciInfo;
+    ciInfo.dwSize = 100;
+    ciInfo.bVisible = show_cursor;
+    SetConsoleCursorInfo(hConsole, &ciInfo);
 }
 // cursor_coords singleton functions END
 
@@ -115,7 +124,9 @@ void print_help(std::string command_type) {
     }
 }
 
-void print_by_char(std::string text, bool keep_original_coords, print_style style, int no_of_loading, bool cleanup) {
+void print_by_char(std::string text, bool keep_original_coords, print_style style, int loading_cycles, bool cleanup) {
+    cursor_coords::get_instance()->toggle_cursor();
+
     // "Enter to continue."
     if (text == ENTER_TO_CONTINUE) {
         cursor_coords::get_instance()->set_cursor({0, SCREEN_HEIGHT - 1});
@@ -155,11 +166,23 @@ void print_by_char(std::string text, bool keep_original_coords, print_style styl
             new_coords.X = 0;
             new_coords.Y = cursor_coords::get_instance()->get_screen_coords().Y + 1;
             cursor_coords::get_instance()->set_cursor(new_coords);
-        } else {
-            if (length - i <= no_of_loading + 1 && text[i] != '\b') {
+        } else if(text[i] == '\\' && i < length - 1 && text[i + 1] == 'l') { 
+            if (loading_cycles > 0) {
+                std::cout << "  ";
+            }
+
+            for (int cycle = 0; cycle < loading_cycles; cycle++) {
+                std::cout << "\b\\";
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                std::cout << "\b|";
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                std::cout << "\b/";
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
 
+            std::cout << "\b \b\b";
+            i++;
+        } else {
             // ignore spaces at beginning of line (only if not from clean_lines)
             if (!(!cleanup && text[i] == ' ' && cursor_coords::get_instance()->get_screen_coords().X == 0)) {
                 COORD new_coords;
@@ -202,6 +225,8 @@ void print_by_char(std::string text, bool keep_original_coords, print_style styl
     }
     cursor_coords::get_instance()->set_cursor();
     set_term_color(CONTROLLER_TYPE_STYLE);
+
+    cursor_coords::get_instance()->toggle_cursor();
 }
 
 void clean_lines(SHORT start_line, SHORT no_of_lines, bool keep_original_coords) {
@@ -214,7 +239,7 @@ void clean_lines(SHORT start_line, SHORT no_of_lines, bool keep_original_coords)
     COORD original_coords = cursor_coords::get_instance()->get_screen_coords();
 
     cursor_coords::get_instance()->set_cursor({0, start_line});
-    print_by_char(std::string(no_of_lines * SCREEN_WIDTH, ' '), true, CONTROLLER_INFO_STYLE, -1, true);
+    print_by_char(std::string(no_of_lines * SCREEN_WIDTH, ' '), true, CONTROLLER_INFO_STYLE, 0, true);
     if (keep_original_coords) {
         cursor_coords::get_instance()->set_screen_coords(original_coords);
     } else {

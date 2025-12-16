@@ -59,10 +59,8 @@ struct print_style {
 // this is a singleton for the absolute coordinates of the computer screen
 // and the screen coordinates (coordinates of the cursor within the computer screen)
 class cursor_coords {
-    // handle for console (terminal)
-    HANDLE hConsole;
-    // console cursor info
-    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
+    // for toggling cursor
+    boolean show_cursor = true;
 
     // coordinates for cursor
     // abs_coords                 -> the absolute coordinates of the first screen character (top left)
@@ -100,6 +98,9 @@ public:
 
     // prints given string into debug
     void print_debug(std::string text);
+
+    // toggles between visible and hidden cursor
+    void toggle_cursor(); 
 };
 
 // terminal styles
@@ -132,13 +133,13 @@ const int THREE_DOTS = 3;
 const char ENTER_TO_CONTINUE[] = "\\";
 
 // function to print text char by char (so as to not go out of bounds)
-// keep_original_coords -> saves the coords before printing, and sets cursor and global screen_coords to them
+// keep_original_coords -> saves the coords before printing, and sets cursor and global screen_coords to them after printing
 // (for text editing like backspace or typing in the middle of the command, not at the end)
-// style to change style of text, loading to wait before printing last no_of_loading elements in string
+// style to change style of text, loading cycles sets how many times the throbber spins at "\\l" position
 // print_by_char(); will print "Enter to continue." at end of page and wait for key press
 // cleanup is specifically for the clean_lines command (so that text repositioning doesn't fuck with it)
 void print_by_char(std::string text = ENTER_TO_CONTINUE, bool keep_original_coords = false, 
-    print_style style = CONTROLLER_TYPE_STYLE, int no_of_loading = -1, bool cleanup = false);
+    print_style style = CONTROLLER_TYPE_STYLE, int loading_cycles = 0, bool cleanup = false);
 
 const int CLEAN_SCREEN = -1;
 
