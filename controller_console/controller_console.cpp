@@ -156,7 +156,7 @@ void print_by_char(std::string text, bool keep_original_coords, print_style styl
             new_coords.Y = cursor_coords::get_instance()->get_screen_coords().Y + 1;
             cursor_coords::get_instance()->set_cursor(new_coords);
         } else {
-            if (length - i <= no_of_loading + 1) {
+            if (length - i <= no_of_loading + 1 && text[i] != '\b') {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
 

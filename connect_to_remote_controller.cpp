@@ -119,11 +119,11 @@ std::string parse_command_type(const std::string command, const std::vector<std:
     for (auto poss_type: accepted_commands) {
 
         // separate check for movement (w|a|s|d) command
-        if (poss_type == DIRECTIONS && DIRECTIONS.find(type) != std::string::npos) {
-            type = poss_type;
-            type_found = true;
-            break;
-        }
+        // if (poss_type == DIRECTIONS && DIRECTIONS.find(type) != std::string::npos) {
+        //     type = poss_type;
+        //     type_found = true;
+        //     break;
+        // }
 
         type_found = true;
         for (int i = 0; i < length; i++) {
@@ -197,91 +197,91 @@ std::string random_password() {
     return password;
 }
 
-void mission_loop(const std::vector<std::string> accepted_commands, destructor_class *destructor, venator_class *venator) {
-    // keeping the original coords, so that this function can be generalized
-    // rather than starting on line 1, or any other specific line, it starts
-    // on line original_coords.Y
-    COORD original_coords = cursor_coords::get_instance()->get_screen_coords();
+// void mission_loop(const std::vector<std::string> accepted_commands, destructor_class *destructor, venator_class *venator) {
+//     // keeping the original coords, so that this function can be generalized
+//     // rather than starting on line 1, or any other specific line, it starts
+//     // on line original_coords.Y
+//     COORD original_coords = cursor_coords::get_instance()->get_screen_coords();
 
-    destructor->print_scan();
+//     destructor->print_scan();
 
-    // printing subsystem status starting with the same line as max scan range line
-    COORD new_coords;
-    new_coords.X = 0;
-    new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
-    cursor_coords::get_instance()->set_cursor(new_coords);
-    destructor->print_subsystem_status();
-    new_coords.Y = original_coords.Y;
-    cursor_coords::get_instance()->set_cursor(new_coords);
-    while (true) {
-        if (venator != nullptr) {
-            venator->action(destructor);
-        }
+//     // printing subsystem status starting with the same line as max scan range line
+//     COORD new_coords;
+//     new_coords.X = 0;
+//     new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
+//     cursor_coords::get_instance()->set_cursor(new_coords);
+//     destructor->print_subsystem_status();
+//     new_coords.Y = original_coords.Y;
+//     cursor_coords::get_instance()->set_cursor(new_coords);
+//     while (true) {
+//         if (venator != nullptr) {
+//             venator->action(destructor);
+//         }
 
-        std::string command = get_engineer_command();
+//         std::string command = get_engineer_command();
 
-        // clean response to command (such as command list) -> needs to be before parsing,
-        // so as to not delete the errors printed by it
-        clean_lines(original_coords.Y + 1, accepted_commands.size());
+//         // clean response to command (such as command list) -> needs to be before parsing,
+//         // so as to not delete the errors printed by it
+//         clean_lines(original_coords.Y + 1, accepted_commands.size());
 
-        std::string type  = parse_command_type(command, accepted_commands);
-        int add_parameter = parse_command_parameter(command, type);
+//         std::string type  = parse_command_type(command, accepted_commands);
+//         int add_parameter = parse_command_parameter(command, type);
 
-        bool skip_loop = false;
-        if (type == "" || type == "error") {
-            skip_loop = true;
-        }
+//         bool skip_loop = false;
+//         if (type == "" || type == "error") {
+//             skip_loop = true;
+//         }
 
-        // the two commands for these checks have already printed the error, all that remains is to continue;
-        // AGAIN, I NEED TO GIVE IT TYPE NOT COMMAND AAAAAAA
-        if (!skip_loop && add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(type, add_parameter)) {
-            skip_loop = true;
-        }   
+//         // the two commands for these checks have already printed the error, all that remains is to continue;
+//         // AGAIN, I NEED TO GIVE IT TYPE NOT COMMAND AAAAAAA
+//         if (!skip_loop && add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(type, add_parameter)) {
+//             skip_loop = true;
+//         }   
         
-        // !!! update help
-        if (!skip_loop && type == "help") {
-            for (auto command_type: accepted_commands) {
-                print_help(command_type);
-            }
-            skip_loop = true;
-        }
+//         // !!! update help
+//         if (!skip_loop && type == "help") {
+//             for (auto command_type: accepted_commands) {
+//                 print_help(command_type);
+//             }
+//             skip_loop = true;
+//         }
 
-        if (!skip_loop && type == "energy") {
-            destructor->generate_energy(add_parameter);
-            skip_loop = true;
-        }
+//         if (!skip_loop && type == "energy") {
+//             destructor->generate_energy(add_parameter);
+//             skip_loop = true;
+//         }
 
-        // HERE I AM **NOT** SUPPOSED TO GIVE IT TYPE AAAA
-        // THE ONE PLACE
-        if (!skip_loop) {
-            skip_loop = destructor->move(command.substr(0, command.find(' ')));
-        }
+//         // HERE I AM **NOT** SUPPOSED TO GIVE IT TYPE AAAA
+//         // THE ONE PLACE
+//         if (!skip_loop) {
+//             skip_loop = destructor->move(command.substr(0, command.find(' ')));
+//         }
 
-        if (!skip_loop && type == "scan") {
-            destructor->scan(add_parameter);
-            skip_loop = true;
-        }
+//         if (!skip_loop && type == "scan") {
+//             destructor->scan(add_parameter);
+//             skip_loop = true;
+//         }
 
-        // this is for the training simulators
-        // this has no reason to exist as an actual combat action
-        if (!skip_loop && type == "continue") {
-            clean_lines();
-            return;
-        }
+//         // this is for the training simulators
+//         // this has no reason to exist as an actual combat action
+//         if (!skip_loop && type == "continue") {
+//             clean_lines();
+//             return;
+//         }
 
-        new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
-        cursor_coords::get_instance()->set_cursor(new_coords);
-        destructor->print_subsystem_status();
-        destructor->print_scan();
-        new_coords.Y = original_coords.Y;
-        cursor_coords::get_instance()->set_cursor(new_coords);
+//         new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
+//         cursor_coords::get_instance()->set_cursor(new_coords);
+//         destructor->print_subsystem_status();
+//         destructor->print_scan();
+//         new_coords.Y = original_coords.Y;
+//         cursor_coords::get_instance()->set_cursor(new_coords);
 
-        combat_zone::get_instance()->debug_print();
+//         combat_zone::get_instance()->debug_print();
 
-        // clean last command
-        clean_lines(original_coords.Y);
-    }
-}
+//         // clean last command
+//         clean_lines(original_coords.Y);
+//     }
+// }
 
 void training_simulator() {
     print_by_char("Welcome, engineer! This is a short introduction (or more hopefully, a reminder) of the abilities of our venator foes, and the counters of a destructor unit, designed by the great Pashiv Itcha and his team of brilliant engineers.\n", false, CONTROLLER_SUCCES_STYLE);
@@ -302,8 +302,8 @@ void training_simulator() {
     print_by_char("That said, get used to the controls in this first simulation, then hit 'c[ontinue]'.\n", false, CONTROLLER_INFO_STYLE);
 
     // initialise map
-    combat_zone::get_instance()->init_map();
-    mission_loop(SIMULATOR_MOVEMENT, new destructor_class);
+    // combat_zone::get_instance()->init_map();
+    // mission_loop(SIMULATOR_MOVEMENT, new destructor_class);
 
     print_by_char("Now, the first essential lesson: ", false, CONTROLLER_INFO_STYLE);
     print_by_char("Stay. Away. From the venator.\n", false, CONTROLLER_ERROR_STYLE);
@@ -315,8 +315,8 @@ void training_simulator() {
     // print_by_char();
     char input = getch();
 
-    combat_zone::get_instance()->init_map(MEDIUM_MAP_SIZE);
-    mission_loop(SIMULATOR_MOVEMENT, new destructor_class, new venator_class);
+    // combat_zone::get_instance()->init_map(MEDIUM_MAP_SIZE);
+    // mission_loop(SIMULATOR_MOVEMENT, new destructor_class, new venator_class);
 }
 
 void init_controller() {
@@ -324,9 +324,12 @@ void init_controller() {
 
     cursor_coords::get_instance()->init_coords();
     cursor_coords::get_instance()->set_cursor();
-    
+
+    print_by_char("Searching for active controller...\n", false, CONTROLLER_INFO_STYLE, 3);
     // rand() % 94 + 33 gives a number between 33 and 126, which is (approximately) where "normal" chars (usable for the name) are
     std::string random_name = {rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum()};
+    print_by_char("Remote controller found: RC" + random_name + ".\n", false, CONTROLLER_INFO_STYLE);
+    print_by_char("Establishing connection...\n", false, CONTROLLER_INFO_STYLE, 3);
     print_by_char("Success! You are now connected to remote controller RC" + random_name + ".\n", false, CONTROLLER_SUCCES_STYLE);
 
     // init RC loop
@@ -335,7 +338,7 @@ void init_controller() {
 
         // clean response to command (such as command list) -> needs to be before parsing,
         // so as to not delete the errors printed by it
-        clean_lines(2, 3);
+        clean_lines(5, 3);
 
         std::string type = parse_command_type(command, INIT_COMMANDS);
 
@@ -347,20 +350,21 @@ void init_controller() {
 
         if (type == "start") {
             // clear all printed lines
-            clean_lines(0, 5);
-            print_by_char("Press enter to receieve instructions in simulator training.\nIf you have used an RC to control a destructor before, type 's[kip]' to ignore this section.\n(Activating a destructor unit without simulator training is", false, CONTROLLER_INFO_STYLE);
-            print_by_char(" ill", false, CONTROLLER_ERROR_STYLE);
+            clean_lines(0, 8);
+            print_by_char("Is this the first time you are operating a remote controller?\nIt is ", false, CONTROLLER_INFO_STYLE);
+            print_by_char("ill", false, CONTROLLER_ERROR_STYLE);
             print_by_char("-", false, CONTROLLER_INFO_STYLE);
             print_by_char("advised", false, CONTROLLER_ERROR_STYLE);
-            print_by_char(")\n", false, CONTROLLER_INFO_STYLE);
-            std::string command = get_engineer_command();
-            std::string type    = parse_command_type(command, {"", "skip", "exit"});
-            clean_lines(0, 4);
-            if (type != "skip") {
-                training_simulator();
+            print_by_char(" to operate an RC unit without proper training.\nY[es]/N[o]\n", false, CONTROLLER_INFO_STYLE);
+
+            char input = getch();
+            while (!(input == 'y' || input == 'Y') && !(input == 'n' || input == 'N')) {
+                input = getch();
             }
-            if (type != "exit") {
-                connect_to_destructor = true;
+
+            clean_lines(0, 4);
+            if (input == 'y' || input == 'Y') {
+                training_simulator();
             }
             return;
         }
@@ -375,7 +379,7 @@ void init_controller() {
         }
 
         // clean last command
-        clean_lines(1);
+        clean_lines(4);
     }
 }
 

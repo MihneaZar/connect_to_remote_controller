@@ -15,3 +15,12 @@ V  = venator
 // forget about everything from before
 you have very little time (~0.1s) to save the system
 every action takes a tiny fraction of time, partially random
+
+OR 
+
+puzzle minigames (such as binary grid, nonogram, lightline, wordle?, etc.) -> the time it takes you is proportional to the time cost
+harder puzzle types for more powerful abilities?
+
+OR 
+
+puzzles where solution isnt clear until you submit it, and mistakes cost more

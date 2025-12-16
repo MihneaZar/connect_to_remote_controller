@@ -59,6 +59,11 @@ struct print_style {
 // this is a singleton for the absolute coordinates of the computer screen
 // and the screen coordinates (coordinates of the cursor within the computer screen)
 class cursor_coords {
+    // handle for console (terminal)
+    HANDLE hConsole;
+    // console cursor info
+    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
+
     // coordinates for cursor
     // abs_coords                 -> the absolute coordinates of the first screen character (top left)
     // screen_coords              -> current coordinates on the screen, relative to the abs_coords
