@@ -22,6 +22,8 @@ void cursor_coords::init_coords() {
     abs_coords.X  = 1;
     abs_coords.Y -= SCREEN_HEIGHT;
     screen_coords = COORD{0, 0};
+
+    init_done = true;
 }
 
 void cursor_coords::set_screen_coords(COORD new_coords) {
@@ -66,6 +68,10 @@ void cursor_coords::toggle_cursor() {
     ciInfo.bVisible = show_cursor;
     SetConsoleCursorInfo(hConsole, &ciInfo);
 }
+
+boolean cursor_coords::coords_initiated() {
+    return init_done;
+}
 // cursor_coords singleton functions END
 
 bool same_style(print_style style1, print_style style2) {
@@ -102,13 +108,13 @@ void print_screen() {
 
 void print_help(std::string command_type) {
     if (command_type == "help") {
-        print_by_char("-> h[elp] = this command (lists all available commands)\n", false, CONTROLLER_INFO_STYLE);
+        print_by_char("-> h[elp] - this command (lists all available commands)\n", false, CONTROLLER_INFO_STYLE);
     }
     if (command_type == "start") {
-        print_by_char("-> s[tart] = begin simulator training\n", false, CONTROLLER_INFO_STYLE);
+        print_by_char("-> s[tart] - begin simulator training\n", false, CONTROLLER_INFO_STYLE);
     }
     if (command_type == "exit") {
-        print_by_char("-> e[xit]  = sever connection to current remote controller\n", false, CONTROLLER_INFO_STYLE);
+        print_by_char("-> e[xit] - sever connection to current remote controller\n", false, CONTROLLER_INFO_STYLE);
     }
     if (command_type == "continue") {
         print_by_char("-> c[ontinue] = move onto the next training phase\n", false, CONTROLLER_INFO_STYLE);
@@ -161,7 +167,7 @@ void print_by_char(std::string text, bool keep_original_coords, print_style styl
             }
         }
 
-        if (text[i] == '\n') {
+        if (text[i] == '\n' && cursor_coords::get_instance()->coords_initiated()) {
             COORD new_coords;
             new_coords.X = 0;
             new_coords.Y = cursor_coords::get_instance()->get_screen_coords().Y + 1;

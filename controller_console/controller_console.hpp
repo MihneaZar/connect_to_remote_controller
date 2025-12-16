@@ -61,6 +61,9 @@ struct print_style {
 class cursor_coords {
     // for toggling cursor
     boolean show_cursor = true;
+    
+    // true if screen coordinates have been initiated
+    boolean init_done = false;
 
     // coordinates for cursor
     // abs_coords                 -> the absolute coordinates of the first screen character (top left)
@@ -101,12 +104,16 @@ public:
 
     // toggles between visible and hidden cursor
     void toggle_cursor(); 
+
+    // returns true if coordinates have been initiated
+    boolean coords_initiated();
 };
 
 // terminal styles
 const print_style DEFAULT_TERM_STYLE =  {WHITE, BLACK, NOT_BRIGHT, NOT_BRIGHT};
 const print_style ERROR_TERM_STYLE   =    {RED, BLACK, NOT_BRIGHT, NOT_BRIGHT};
 const print_style INFO_TERM_STYLE    = {YELLOW, BLACK, NOT_BRIGHT, NOT_BRIGHT};
+const print_style HIDDEN_TERM_STYLE  =  {BLACK, BLACK, NOT_BRIGHT, NOT_BRIGHT};
 
 // controller styles
 const print_style CONTROLLER_TYPE_STYLE    =  {WHITE, BLUE, NOT_BRIGHT, NOT_BRIGHT};

@@ -326,9 +326,9 @@ void init_controller() {
     print_by_char("Searching for active controller\\l.\n", false, CONTROLLER_INFO_STYLE, rand() % 3 + 1);
     // rand() % 94 + 33 gives a number between 33 and 126, which is (approximately) where "normal" chars (usable for the name) are
     std::string random_name = {rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum()};
-    print_by_char("Remote controller found: RC" + random_name + ".\n", false, CONTROLLER_INFO_STYLE);
+    print_by_char("Remote controller found: <RC" + random_name + ">.\n", false, CONTROLLER_INFO_STYLE);
     print_by_char("Establishing connection\\l.\n", false, CONTROLLER_INFO_STYLE, rand() % 2 + 1);
-    print_by_char("Success! You are now connected to remote controller RC" + random_name + ".\n", false, CONTROLLER_SUCCES_STYLE);
+    print_by_char("Success! You are now connected to remote controller <RC" + random_name + ">.\n", false, CONTROLLER_SUCCES_STYLE);
 
     // init RC loop
     while (true) {
@@ -429,8 +429,7 @@ int main(int argc, char *argv[]) {
         std::ofstream write_pass(".pass/pass");
         write_pass << new_pass;
         write_pass.close();
-        set_term_color(ERROR_TERM_STYLE);
-        std::cout << "\nMust provide user and temporary password hash to initiate connection. New password generated.\n\n";
+        print_by_char("\nMust provide user and temporary password hash to initiate connection. New password generated.\n\n", false, ERROR_TERM_STYLE);
         set_term_color();
         return 0;
     }
@@ -443,8 +442,7 @@ int main(int argc, char *argv[]) {
         std::ofstream write_pass(".pass/pass");
         write_pass << new_pass;
         write_pass.close();
-        set_term_color(ERROR_TERM_STYLE);
-        std::cout << "\nOnly a system admin may connect to a remote controller. New password generated.\n\n";
+        print_by_char("\nOnly a system admin may connect to a remote controller. New password generated.\n\n", false, ERROR_TERM_STYLE);
         set_term_color();
         return 0;
     }
@@ -462,22 +460,12 @@ int main(int argc, char *argv[]) {
     // perhaps make the black-on-black text be decodable with some information from controller (perhaps if you win?)
     // reference administrator-X entity or whatever it is, and the hunter entities 
     // if (temp_pass_hash == ".debug") {
-    //     set_term_color(INFO_TERM_STYLE);
-    //     std::cout << "Entering debugging mode";
-    //     for (int i = 0; i < THREE_DOTS; i++) {
-    //         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    //         std::cout << '.';
-    //     }
-    //     set_term_color(ERROR_TERM_STYLE);
-    //     std::cout << "\n\nError: You are not ";
-    //     set_term_color({BLACK, BLACK, NOT_BRIGHT, NOT_BRIGHT});
-    //     std::cout << "<E00000X>";
-    //     set_term_color(ERROR_TERM_STYLE);
-    //     std::cout << '.';
-    //     set_term_color({BLACK, BLACK, NOT_BRIGHT, NOT_BRIGHT});
-    //     std::cout << "\n<V" + std::string({rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum()}) + '>';
-    //     set_term_color(ERROR_TERM_STYLE);
-    //     std::cout << " has been dispatched.\n\n";
+    //     print_by_char("\nEntering debugging mode\\l.\n", false, INFO_TERM_STYLE, rand() % 2 + 1);
+    //     print_by_char("Error: You are not ", false, ERROR_TERM_STYLE);
+    //     print_by_char("<E00000X>", false, HIDDEN_TERM_STYLE);
+    //     print_by_char(".\n", false, ERROR_TERM_STYLE);
+    //     print_by_char("<V" + std::string({rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum()}) + '>', false, HIDDEN_TERM_STYLE);
+    //     print_by_char(" has been dispatched.\n\n", false, ERROR_TERM_STYLE);
     //     set_term_color();
     //     return 0;
     // }
