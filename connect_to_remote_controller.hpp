@@ -32,6 +32,9 @@ std::string md5(const std::string content);
 // and has printed an error
 const int PARAMETER_ERROR = -1;
 
+// first line for commands in binary converter
+const int BINARY_FIRST_LINE = 7;
+
 // commands for the binary converter
 const std::vector<std::string> BINARY_CONVERTER_COMMANDS = {"help", "dec_to_bin", "bin_to_dec", "exit"};
 

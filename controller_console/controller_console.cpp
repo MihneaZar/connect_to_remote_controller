@@ -130,8 +130,8 @@ void print_help(std::string command_type, int progress_state) {
     }
 
     if (command_type == "exit") {
-        // binary converter
         if (progress_state == -1) {
+            // binary converter
             print_by_char("-> e[xit] - turn off converter\n", false, CONTROLLER_INFO_STYLE);
         } else {
             print_by_char("-> e[xit] - sever connection to current remote controller\n", false, CONTROLLER_INFO_STYLE);

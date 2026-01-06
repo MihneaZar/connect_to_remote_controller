@@ -330,21 +330,17 @@ void run_binary_converter() {
     cursor_coords::get_instance()->set_cursor();
 
     print_by_char("Binary-decimal converter\n\n", false, CONTROLLER_INFO_STYLE);
+    print_by_char("Commands:\n-> d[ec_to_bin] <number> - convert given 8-bit decimal number to binary\n-> b[in_to_dec] <binary_string> - convert given 8-bit binary string to decimal number\n-> e[xit] - turn off converter\n\n", false, CONTROLLER_INFO_STYLE);
 
-    SHORT command_line_pos = 2;
+    SHORT command_line_pos = BINARY_FIRST_LINE;
     while (true) {
         clean_lines(command_line_pos);
 
         std::string command = get_engineer_command();
         
-        clean_lines(command_line_pos + 1, 5);
+        clean_lines(command_line_pos + 1);
 
         std::string type = parse_command_type(command, BINARY_CONVERTER_COMMANDS);
-        if (type == "help") {
-            for (auto command_type: BINARY_CONVERTER_COMMANDS) {
-                print_help(command_type, -1);
-            }
-        }
 
         if (type == "dec_to_bin") {
             int dec_value = 0;
@@ -385,8 +381,8 @@ void run_binary_converter() {
                 print_by_char(binary_string, false, CONTROLLER_SUCCES_STYLE);
                 command_line_pos += 2;
 
-                if (SCREEN_HEIGHT - command_line_pos < 6) {
-                    command_line_pos = 2;
+                if (SCREEN_HEIGHT - command_line_pos < 2) {
+                    command_line_pos = BINARY_FIRST_LINE;
                     clean_lines(command_line_pos, 2);
                 }
             }
@@ -416,8 +412,8 @@ void run_binary_converter() {
                 print_by_char(std::to_string(dec_value), false, CONTROLLER_SUCCES_STYLE);
                 command_line_pos += 2;
 
-                if (SCREEN_HEIGHT - command_line_pos < 6) {
-                    command_line_pos = 2;
+                if (SCREEN_HEIGHT - command_line_pos < 2) {
+                    command_line_pos = BINARY_FIRST_LINE;
                     clean_lines(command_line_pos, 2);
                 }
             }
@@ -530,7 +526,7 @@ int main(int argc, char *argv[]) {
         if (option == "--help" || option == "-h") {
             std::cout << "\nConnect to remote controller.\n\n";
             std::cout << "Usage:\n\t./connect_to_remote_controller -h | --help\n\t./connect_to_remote_controller -b | --binary\n\t./connect_to_remote_controller --md5 <string_without_spaces>\n\t./connect_to_remote_controller <user_name> <password_hash>\n\n";
-            std::cout << "Options:\n\t-h --help Print all executable usages (this page).\n\t-b --binary Run executable locally as an 8-bit binary-decimal converter.\n\t--md5 Convert given string to MD5 hash.\n\n";
+            std::cout << "Options:\n\t-h --help   Print all executable usages (this page).\n\t-b --binary Run executable locally as an 8-bit binary-decimal converter.\n\t--md5       Convert given string to MD5 hash.\n\n";
             return 0;
         }
 
