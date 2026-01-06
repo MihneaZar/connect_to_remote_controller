@@ -1,6 +1,11 @@
 #include "connect_to_remote_controller.hpp"
 
-bool connect_to_destructor = false;
+// this will be a variable which signifies current progress
+// at least for now, it will be hidden within the password
+// written in hex, starting at password_length / 2
+// to hide it even better, a..f will have random capitalization
+// ITS A..F FOR HEX GOD FUCKING DAMNIT-
+int progress_state = 0;
 
 std::string get_engineer_command() {
     print_by_char(">> ");
@@ -189,99 +194,97 @@ char rand_alfanum() {
 }
 
 std::string random_password() {
-    int length = rand() % (MAX_PASS_LENGTH + 1);
+    int pow16 = 1;
+    
+    // finding biggest power of 16 
+    // smaller or equal to progress state
+    while (pow16 * 16 <= progress_state) {
+        pow16 *= 16;    
+    }
+
+    std::string hidden_progress;
+    // avoiding from changing the global variable
+    int cp_progress_state = progress_state;
+    while (pow16 > 0) {
+        // digit in hex
+        int digit = 0;
+        while (pow16 * (digit + 1) <= cp_progress_state) {
+            digit++;
+        }
+        // a..f
+        if (digit >= 10) {
+            if (rand() % 2 == 0) {
+                // not capitalized
+                hidden_progress += (char) 'a' + digit - 10;
+            } else {
+                // capitalized 
+                hidden_progress += (char) 'A' + digit - 10;
+            }
+        } else {
+            hidden_progress += (char) '0' + digit;
+        }
+        cp_progress_state -= pow16 * digit;
+        pow16 /= 16;
+    }
+
+    int hidden_length = hidden_progress.length();
+
+    // the +1 is for a random, non-a..f letter (randomly capitalized)
+    // so that the program knows where the sequence for current progress ends
+    int length = rand() % (MAX_PASS_LENGTH + 1 - (MIN_PASS_LENGTH + hidden_length + 1)) + MIN_PASS_LENGTH;
     std::string password;
     for (int i = 0; i < length; i++) {
         password.push_back(rand_alfanum());
     }
-    return password;
+
+    int total_length = length + hidden_length;
+
+    // padding hidden_progress on the right if the total length is even
+    // for whatever reason, when it is even, the program can't read the progress properly 
+    // if (total_length % 2 == 0) {
+    //     hidden_progress = rand_alfanum() + hidden_progress;
+    // }
+    
+    // inserting a random non-a..f letter
+    // THERES 6 U BUFFOON
+    char random_char = (char) 'a' + rand() % 21 + 6; 
+    if (rand() % 2 == 1) {
+        random_char = (char) 'A' + rand() % 21 + 6; 
+    }
+    return password.substr(0, (total_length - 1) / 2) + hidden_progress + random_char + password.substr(total_length / 2);
 }
 
-// void mission_loop(const std::vector<std::string> accepted_commands, destructor_class *destructor, venator_class *venator) {
-//     // keeping the original coords, so that this function can be generalized
-//     // rather than starting on line 1, or any other specific line, it starts
-//     // on line original_coords.Y
-//     COORD original_coords = cursor_coords::get_instance()->get_screen_coords();
+int get_progress_state(std::string pass) {
+    int state = 0;
+    int position = (pass.length() - 1) / 2;
+    while(true) {
+        bool still_valid = false;
 
-//     destructor->print_scan();
+        // 0..9 digits
+        if ('0' <= pass[position] && pass[position] <= '9') {
+            state = state * 16 + pass[position] - '0';
+            still_valid = true;
+        }
 
-//     // printing subsystem status starting with the same line as max scan range line
-//     COORD new_coords;
-//     new_coords.X = 0;
-//     new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
-//     cursor_coords::get_instance()->set_cursor(new_coords);
-//     destructor->print_subsystem_status();
-//     new_coords.Y = original_coords.Y;
-//     cursor_coords::get_instance()->set_cursor(new_coords);
-//     while (true) {
-//         if (venator != nullptr) {
-//             venator->action(destructor);
-//         }
+        // a..F
+        if ('a' <= pass[position] && pass[position] <= 'f') {
+            state = state * 16 + pass[position] - 'a' + 10;
+            still_valid = true;
+        }
 
-//         std::string command = get_engineer_command();
+        // A..F
+        if ('A' <= pass[position] && pass[position] <= 'F') {
+            state = state * 16 + pass[position] - 'A' + 10;
+            still_valid = true;
+        }
 
-//         // clean response to command (such as command list) -> needs to be before parsing,
-//         // so as to not delete the errors printed by it
-//         clean_lines(original_coords.Y + 1, accepted_commands.size());
-
-//         std::string type  = parse_command_type(command, accepted_commands);
-//         int add_parameter = parse_command_parameter(command, type);
-
-//         bool skip_loop = false;
-//         if (type == "" || type == "error") {
-//             skip_loop = true;
-//         }
-
-//         // the two commands for these checks have already printed the error, all that remains is to continue;
-//         // AGAIN, I NEED TO GIVE IT TYPE NOT COMMAND AAAAAAA
-//         if (!skip_loop && add_parameter == PARAMETER_ERROR || !destructor->check_energy_cooldown(type, add_parameter)) {
-//             skip_loop = true;
-//         }   
-        
-//         // !!! update help
-//         if (!skip_loop && type == "help") {
-//             for (auto command_type: accepted_commands) {
-//                 print_help(command_type);
-//             }
-//             skip_loop = true;
-//         }
-
-//         if (!skip_loop && type == "energy") {
-//             destructor->generate_energy(add_parameter);
-//             skip_loop = true;
-//         }
-
-//         // HERE I AM **NOT** SUPPOSED TO GIVE IT TYPE AAAA
-//         // THE ONE PLACE
-//         if (!skip_loop) {
-//             skip_loop = destructor->move(command.substr(0, command.find(' ')));
-//         }
-
-//         if (!skip_loop && type == "scan") {
-//             destructor->scan(add_parameter);
-//             skip_loop = true;
-//         }
-
-//         // this is for the training simulators
-//         // this has no reason to exist as an actual combat action
-//         if (!skip_loop && type == "continue") {
-//             clean_lines();
-//             return;
-//         }
-
-//         new_coords.Y = SCREEN_HEIGHT - (2 * MAX_SCAN_RANGE + 1);
-//         cursor_coords::get_instance()->set_cursor(new_coords);
-//         destructor->print_subsystem_status();
-//         destructor->print_scan();
-//         new_coords.Y = original_coords.Y;
-//         cursor_coords::get_instance()->set_cursor(new_coords);
-
-//         combat_zone::get_instance()->debug_print();
-
-//         // clean last command
-//         clean_lines(original_coords.Y);
-//     }
-// }
+        if (!still_valid) {
+            break;
+        }
+        position++;
+    }
+    return state;
+}
 
 void training_simulator() {
     print_by_char("Welcome, engineer! This is a short introduction (or more hopefully, a reminder) of the abilities of our venator foes, and the counters of a destructor unit, designed by the great Pashiv Itcha and his team of brilliant engineers.\n", false, CONTROLLER_SUCCES_STYLE);
@@ -324,11 +327,10 @@ void init_controller() {
     cursor_coords::get_instance()->set_cursor();
 
     print_by_char("Searching for active controller\\l.\n", false, CONTROLLER_INFO_STYLE, rand() % 3 + 1);
-    // rand() % 94 + 33 gives a number between 33 and 126, which is (approximately) where "normal" chars (usable for the name) are
-    std::string random_name = {rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum()};
-    print_by_char("Remote controller found: <RC" + random_name + ">.\n", false, CONTROLLER_INFO_STYLE);
+    std::string RC_name = {rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum(), rand_alfanum()};
+    print_by_char("Remote controller found: <RC" + RC_name + ">.\n", false, CONTROLLER_INFO_STYLE);
     print_by_char("Establishing connection\\l.\n", false, CONTROLLER_INFO_STYLE, rand() % 2 + 1);
-    print_by_char("Success! You are now connected to remote controller <RC" + random_name + ">.\n", false, CONTROLLER_SUCCES_STYLE);
+    print_by_char("Success! You are now connected to remote controller <RC" + RC_name + ">.\n", false, CONTROLLER_SUCCES_STYLE);
 
     // init RC loop
     while (true) {
@@ -342,29 +344,15 @@ void init_controller() {
 
         if (type == "help") {
             for (auto command_type: INIT_COMMANDS) {
-                print_help(command_type);
+                print_help(command_type, progress_state);
             }
         }
 
         if (type == "start") {
-            // clear all printed lines
-            clean_lines(0, 8);
-            print_by_char("Is this the first time you are operating a remote controller?\nIt is ", false, CONTROLLER_INFO_STYLE);
-            print_by_char("ill", false, CONTROLLER_ERROR_STYLE);
-            print_by_char("-", false, CONTROLLER_INFO_STYLE);
-            print_by_char("advised", false, CONTROLLER_ERROR_STYLE);
-            print_by_char(" to operate an RC unit without proper training.\nY[es]/N[o]\n", false, CONTROLLER_INFO_STYLE);
-            cursor_coords::get_instance()->toggle_cursor();
-            
-            char input = getch();
-            while (!(input == 'y' || input == 'Y') && !(input == 'n' || input == 'N')) {
-                input = getch();
-            }
-            cursor_coords::get_instance()->toggle_cursor();
-
-            clean_lines(0, 4);
-            if (input == 'y' || input == 'Y') {
+            // entering simulator
+            if (progress_state == 0) {
                 training_simulator();
+                progress_state = 1;
             }
             return;
         }
@@ -421,10 +409,33 @@ std::string md5(const std::string content) {
 
 int main(int argc, char *argv[]) {
     srand(time(0)); // set seed for rand()
+
+    // --help or --binary
+    if (argc == 2) {
+        std::string option = (char*) argv[1];
+        if (option == "--help" || option == "-h") {
+            std::cout << "\nConnect to remote controller.\n\n";
+            std::cout << "Usage:\n\t./connect_to_remote_controller -h | --help\n\t./connect_to_remote_controller -b | --binary\n\t./connect_to_remote_controller --md5 <string_without_spaces>\n\t./connect_to_remote_controller <user_name> <password_hash>\n\n";
+            std::cout << "Options:\n\t-h --help Print all executable usages (this page).\n\t-b --binary Run executable locally as an 8-bit binary-decimal converter.\n\t--md5 Convert given string to MD5 hash.\n\n";
+            return 0;
+        }
+
+        if (option == "--binary" || option == "-b") {
+            // run_binary_converter 
+        }
+    }
+
+    std::ifstream read_pass(".pass/pass");
+    std::string pass;
+    read_pass >> pass;
+    read_pass.close();
+
+    progress_state = get_progress_state(pass);
     
     if (argc < 3) {
         CreateDirectory(".pass", NULL);
         SetFileAttributes(".pass", FILE_ATTRIBUTE_HIDDEN);
+        progress_state++;
         std::string new_pass = random_password();
         std::ofstream write_pass(".pass/pass");
         write_pass << new_pass;
@@ -434,7 +445,16 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    std::string user = (char*) argv[1];
+    std::string first_arg = (char*) argv[1];
+
+    // --md5
+    if (first_arg == "--md5") {
+        std::string unhashed_string = (char*) argv[2];
+        std::cout << '\n' << md5(unhashed_string) << "\n\n";
+        return 0;
+    }
+
+    std::string user = first_arg;
     if (user != "sys_admin") {
         CreateDirectory(".pass", NULL);
         SetFileAttributes(".pass", FILE_ATTRIBUTE_HIDDEN);
@@ -446,11 +466,6 @@ int main(int argc, char *argv[]) {
         set_term_color();
         return 0;
     }
-
-    std::ifstream read_pass(".pass/pass");
-    std::string pass;
-    read_pass >> pass;
-    read_pass.close();
 
     std::string pass_hash = md5(pass);
 
@@ -478,7 +493,7 @@ int main(int argc, char *argv[]) {
         write_pass << new_pass;
         write_pass.close();
         set_term_color(ERROR_TERM_STYLE);
-        std::cout << "\nTemporary password hash is incorrect. New password generated.\n\n";
+        print_by_char("\nTemporary password hash is incorrect. New password generated.\n\n", false, ERROR_TERM_STYLE);
         set_term_color();
         return 0;
     }

@@ -106,25 +106,35 @@ void print_screen() {
     std::cout << bottom_edge;
 }
 
-void print_help(std::string command_type) {
+void print_help(std::string command_type, int progress_state) {
     if (command_type == "help") {
         print_by_char("-> h[elp] - this command (lists all available commands)\n", false, CONTROLLER_INFO_STYLE);
     }
+
     if (command_type == "start") {
-        print_by_char("-> s[tart] - begin simulator training\n", false, CONTROLLER_INFO_STYLE);
+        if (progress_state == 0) {
+            print_by_char("-> s[tart] - begin simulator training\n", false, CONTROLLER_INFO_STYLE);
+        } else {
+            print_by_char("-> s[tart] - connect to mainframe\n", false, CONTROLLER_INFO_STYLE);
+        }
     }
+
     if (command_type == "exit") {
         print_by_char("-> e[xit] - sever connection to current remote controller\n", false, CONTROLLER_INFO_STYLE);
     }
+
     if (command_type == "continue") {
         print_by_char("-> c[ontinue] = move onto the next training phase\n", false, CONTROLLER_INFO_STYLE);
     }
+
     if (command_type == "energy") {
         print_by_char("-> e[nergy] [add_charge in (1..3)]: generate (1 + 2 * add_charge) energy, 0e, (2 + 2^add_charge)s\n", false, CONTROLLER_INFO_STYLE);
     }
+
     if (command_type == "wasd") {
         print_by_char("-> (w|a|s|d): movement, 1e, 1s\n", false, CONTROLLER_INFO_STYLE);
     }
+    
     if (command_type == "scan") {
         print_by_char("-> sc[an] [add_range in (1..3)]: scan (2 + add_range) units away, (2 * add_range)e, (3 + add_range)s\n", false, CONTROLLER_INFO_STYLE);
     }

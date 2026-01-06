@@ -133,7 +133,7 @@ void set_term_color(print_style style = DEFAULT_TERM_STYLE);
 void print_screen();
 
 // function for printing list of commands
-void print_help(std::string command_type);
+void print_help(std::string command_type, int progress_state);
 
 // signifies times of waiting for ... in a loading info message
 const int THREE_DOTS = 3;

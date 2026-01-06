@@ -57,9 +57,13 @@ int parse_command_parameter(std::string command, std::string type);
 // (purely flavor text, at least for now)
 char rand_alfanum();
 
-const int MAX_PASS_LENGTH = 100;
+const int MAX_PASS_LENGTH = 128;
+const int MIN_PASS_LENGTH = 16;
 // function for creating a random password of at most MAX_PASS_LENGTH characters
 std::string random_password();
+
+// function for getting the progress state from a given password
+int get_progress_state(std::string pass);
 
 // main mission loop
 // accepted commands for simulators (and perhaps different types of destructors in the future)
