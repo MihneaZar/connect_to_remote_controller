@@ -32,6 +32,9 @@ std::string md5(const std::string content);
 // and has printed an error
 const int PARAMETER_ERROR = -1;
 
+// commands for the binary converter
+const std::vector<std::string> BINARY_CONVERTER_COMMANDS = {"help", "dec_to_bin", "bin_to_dec", "exit"};
+
 // list of possible commands for each phase
 // important for commands with identical starting letters (see "s" for south and "sc" for scan):
 // put first the one with less starting letters (if it's only s, it's south, if it's sc, s will fail, then scan will succeed)
@@ -73,6 +76,9 @@ int get_progress_state(std::string pass);
 
 // this is basically the tutorial (with some flavor text sprinkled between phases)
 void training_simulator();
+
+// binary converter function
+void run_binary_converter();
 
 // this bool is set to true when the engineer actually 
 // begins the main controller loop (actual gameplay)

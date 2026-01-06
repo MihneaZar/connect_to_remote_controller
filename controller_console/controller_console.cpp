@@ -111,6 +111,16 @@ void print_help(std::string command_type, int progress_state) {
         print_by_char("-> h[elp] - this command (lists all available commands)\n", false, CONTROLLER_INFO_STYLE);
     }
 
+    // binary converter commands
+    if (command_type == "dec_to_bin") {
+        print_by_char("-> d[ec_to_bin] <number> - convert given 8-bit decimal number to binary\n", false, CONTROLLER_INFO_STYLE);
+    }
+
+    if (command_type == "bin_to_dec") {
+        print_by_char("-> b[in_to_dec] <binary_string> - convert given 8-bit binary string to decimal number\n", false, CONTROLLER_INFO_STYLE);
+    }
+
+
     if (command_type == "start") {
         if (progress_state == 0) {
             print_by_char("-> s[tart] - begin simulator training\n", false, CONTROLLER_INFO_STYLE);
@@ -120,7 +130,12 @@ void print_help(std::string command_type, int progress_state) {
     }
 
     if (command_type == "exit") {
-        print_by_char("-> e[xit] - sever connection to current remote controller\n", false, CONTROLLER_INFO_STYLE);
+        // binary converter
+        if (progress_state == -1) {
+            print_by_char("-> e[xit] - turn off converter\n", false, CONTROLLER_INFO_STYLE);
+        } else {
+            print_by_char("-> e[xit] - sever connection to current remote controller\n", false, CONTROLLER_INFO_STYLE);
+        }
     }
 
     if (command_type == "continue") {

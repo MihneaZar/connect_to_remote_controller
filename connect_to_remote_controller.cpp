@@ -322,7 +322,121 @@ void training_simulator() {
     // mission_loop(SIMULATOR_MOVEMENT, new destructor_class, new venator_class);
 }
 
+void run_binary_converter() {
+    std::cout << "\033[2J\033[1;1H";
+    print_screen();
+
+    cursor_coords::get_instance()->init_coords();
+    cursor_coords::get_instance()->set_cursor();
+
+    print_by_char("Binary-decimal converter\n\n", false, CONTROLLER_INFO_STYLE);
+
+    SHORT command_line_pos = 2;
+    while (true) {
+        clean_lines(command_line_pos);
+
+        std::string command = get_engineer_command();
+        
+        clean_lines(command_line_pos + 1, 5);
+
+        std::string type = parse_command_type(command, BINARY_CONVERTER_COMMANDS);
+        if (type == "help") {
+            for (auto command_type: BINARY_CONVERTER_COMMANDS) {
+                print_help(command_type, -1);
+            }
+        }
+
+        if (type == "dec_to_bin") {
+            int dec_value = 0;
+            bool parse_error = false;
+
+            int length = command.length();
+            for (int i = command.find(' ') + 1; i < length && command[i] != ' '; i++) {
+                if (!('0' <= command[i] && command[i] <= '9') || command[i] == '-') {
+                    print_by_char("Error: non-numeric character.\n", false, CONTROLLER_ERROR_STYLE);
+                    parse_error = true;
+                    break;
+                }
+
+                if (command[i] == '-') {
+                    print_by_char("Error: only 8-bit non-negative decimal numbers are accepted.\n", false, CONTROLLER_ERROR_STYLE);
+                    parse_error = true;
+                    break;
+                }
+
+                dec_value = dec_value * 10 + (int) (command[i] - '0');
+            }
+
+            if (255 < dec_value) {
+                print_by_char("Error: only 8-bit decimal numbers are accepted (<= 255).\n", false, CONTROLLER_ERROR_STYLE);
+                parse_error = true;
+            }
+
+            if (!parse_error) {
+                std::string binary_string;
+                for (int pow2 = 7; pow2 >= 0; pow2--) {
+                    if (dec_value >= 1 << pow2) {
+                        binary_string += '1';
+                        dec_value -= 1 << pow2;
+                    } else { 
+                        binary_string += '0';
+                    }
+                }
+                print_by_char(binary_string, false, CONTROLLER_SUCCES_STYLE);
+                command_line_pos += 2;
+
+                if (SCREEN_HEIGHT - command_line_pos < 6) {
+                    command_line_pos = 2;
+                    clean_lines(command_line_pos, 2);
+                }
+            }
+        }
+
+        if (type == "bin_to_dec") {
+            int dec_value = 0;
+            bool parse_error = false;
+
+            int length = command.length();
+            for (int i = command.find(' ') + 1, pow2 = 7; i < length && command[i] != ' '; i++, pow2--) {
+                if (!('0' <= command[i] && command[i] <= '1')) {
+                    print_by_char("Error: only 1s and 0s are accepted.\n", false, CONTROLLER_ERROR_STYLE);
+                }
+
+                // last character, but there weren't exactly 8 bits processed
+                if ((i + 1 == length || command[i + 1] == ' ') && (pow2 != 0)) {
+                    print_by_char("Error: only 8-bit binary numbers are accepted.\n", false, CONTROLLER_ERROR_STYLE);
+                    parse_error = true;
+                    break;
+                }
+
+                dec_value += (command[i] - '0') << pow2;
+            }
+
+            if (!parse_error) {
+                print_by_char(std::to_string(dec_value), false, CONTROLLER_SUCCES_STYLE);
+                command_line_pos += 2;
+
+                if (SCREEN_HEIGHT - command_line_pos < 6) {
+                    command_line_pos = 2;
+                    clean_lines(command_line_pos, 2);
+                }
+            }
+        }
+
+        if (type == "exit") {
+            return;
+        }
+
+        if (type == "") {
+            print_by_char("Error: Unknown command. Type 'h[elp]' to list commands.\n", false, CONTROLLER_ERROR_STYLE);
+        }
+    }
+}
+
 void init_controller() {
+    std::cout << "\033[2J\033[1;1H";
+    print_screen();
+
     cursor_coords::get_instance()->init_coords();
     cursor_coords::get_instance()->set_cursor();
 
@@ -421,7 +535,14 @@ int main(int argc, char *argv[]) {
         }
 
         if (option == "--binary" || option == "-b") {
-            // run_binary_converter 
+            run_binary_converter(); 
+
+            // reset terminal
+            cursor_coords::get_instance()->set_screen_coords({0, SCREEN_HEIGHT + 1});
+            cursor_coords::get_instance()->set_cursor();
+            set_term_color();
+
+            return 0;
         }
     }
 
@@ -498,8 +619,6 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     
-    std::cout << "\033[2J\033[1;1H";
-    print_screen();
     init_controller();
     
     // loop_controller();
